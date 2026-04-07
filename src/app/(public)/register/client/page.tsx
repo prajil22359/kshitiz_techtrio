@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Store, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Building2, ArrowRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useRouter } from "next/navigation";
 
-export default function VendorRegistration() {
+export default function ClientRegistration() {
   const [step, setStep] = useState(1);
+  const router = useRouter();
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -15,9 +17,8 @@ export default function VendorRegistration() {
     email: "",
     password: "",
     fullName: "",
-    businessName: "",
-    phone: "",
-    altBusiness: ""
+    companyName: "",
+    phone: ""
   });
 
   const handleChange = (e: any) => {
@@ -35,8 +36,12 @@ export default function VendorRegistration() {
   const isStep1Valid =
     formData.firstName && formData.lastName && formData.email && formData.password;
 
-  const isStep2Valid =
-    formData.fullName && formData.businessName && formData.phone;
+  const isStep2Valid = formData.fullName && formData.companyName && formData.phone;
+
+  const handleContinue = () => {
+    // For now simulate successful registration and navigate to client dashboard
+    router.push("/client/dashboard");
+  };
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] flex relative overflow-hidden">
@@ -47,25 +52,25 @@ export default function VendorRegistration() {
         <div>
           <Link href="/" className="flex items-center gap-2 font-bold text-2xl text-[#1A1A1A]">
             <div className="bg-[#1A1A1A] p-2 rounded-xl">
-              <Store className="w-6 h-6 text-primary" />
+              <Building2 className="w-6 h-6 text-primary" />
             </div>
             TechTrio
           </Link>
 
           <div className="mt-32 max-w-lg">
             <h1 className="text-5xl font-extrabold text-[#1A1A1A] leading-tight">
-              Scale your B2B sales automation.
+              Scale your procurement operations.
             </h1>
 
             <p className="mt-6 text-xl text-muted-foreground">
-              Join thousands of verified suppliers fulfilling enterprise requests effortlessly.
+              Join enterprises and startups streamlining procurement with TechTrio.
             </p>
 
             <div className="mt-12 space-y-6">
               {[
-                "Instant access to verified enterprise RFQs",
-                "Automated quoting & intelligent bid matching",
-                "Guaranteed payment protection & fast settlements"
+                "Post requirements and get curated supplier bids",
+                "Smart matching & assisted sourcing",
+                "Payment protection and reliable fulfilment"
               ].map((b, i) => (
                 <div key={i} className="flex items-center gap-4 font-medium">
                   <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
@@ -78,9 +83,7 @@ export default function VendorRegistration() {
           </div>
         </div>
 
-        <p className="text-sm text-muted-foreground">
-          © {new Date().getFullYear()} TechTrio Corp.
-        </p>
+        <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} TechTrio Corp.</p>
       </div>
 
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 z-10">
@@ -93,7 +96,7 @@ export default function VendorRegistration() {
               <div className="w-full flex-shrink-0">
                 <div className="text-center mb-8">
                   <h2 className="text-3xl font-bold text-[#1A1A1A]">Create Account</h2>
-                  <p className="text-muted-foreground mt-1">Register as a supplier</p>
+                  <p className="text-muted-foreground mt-1">Register as a client</p>
                 </div>
 
                 <div className="space-y-4">
@@ -142,18 +145,17 @@ export default function VendorRegistration() {
                   </div>
 
                   <Button
-                    className="w-full h-12 text-base font-semibold mt-4 shadow-sm group"
+                    className="w-full h-12 text-base font-semibold mt-4 shadow-sm group bg-[#A3F43A] hover:bg-[#8FE12F] text-black disabled:opacity-100 disabled:bg-[#A3F43A] disabled:text-black"
                     onClick={goToStep2}
+                    disabled={!isStep1Valid}
                   >
-                    Create Vendor Profile
+                    Create Client Profile
                     <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Button>
 
                   <div className="flex items-center gap-3 py-2">
                     <div className="flex-1 h-px bg-gray-200" />
-                    <span className="text-xs font-semibold tracking-widest text-muted-foreground">
-                      OR
-                    </span>
+                    <span className="text-xs font-semibold tracking-widest text-muted-foreground">OR</span>
                     <div className="flex-1 h-px bg-gray-200" />
                   </div>
 
@@ -171,7 +173,7 @@ export default function VendorRegistration() {
                   </Button>
 
                   <p className="pt-2 text-sm text-center text-muted-foreground">
-                    Already registered?{" "}
+                    Already registered?{' '}
                     <Link href="/login" className="font-semibold text-[#1A1A1A] hover:underline">
                       Sign in
                     </Link>
@@ -197,10 +199,10 @@ export default function VendorRegistration() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-[#1A1A1A]">Business Name</label>
+                  <label className="block text-sm font-semibold text-[#1A1A1A]">Bussiness Name</label>
                   <Input
-                    name="businessName"
-                    placeholder="e.g. John Traders Inc."
+                    name="Business Name"
+                    placeholder="e.g. Acme Corp."
                     className="h-12 bg-gray-50/50"
                     onChange={handleChange}
                   />
@@ -210,37 +212,20 @@ export default function VendorRegistration() {
                   <label className="text-sm font-semibold text-foreground">Phone Number</label>
                   <div className="flex gap-2">
                     <Input disabled placeholder="+91" className="h-12 w-20 bg-gray-100 text-center font-medium" />
-                    <Input type="tel" placeholder="98765 43210" className="h-12 flex-1 bg-gray-50/50" required />
+                    <Input name="phone" type="tel" placeholder="98765 43210" className="h-12 flex-1 bg-gray-50/50" onChange={handleChange} />
                   </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-[#1A1A1A]">
-                    Alternate Business Email
-                  </label>
-                  <Input
-                    name="alternateEmail"
-                    type="email"
-                    placeholder="john@business.com (Optional)"
-                    className="h-12 bg-gray-50/50"
-                    onChange={handleChange}
-                  />
                 </div>
 
                 <Button
                   className="w-full h-12 text-base font-semibold mt-4 shadow-sm group bg-[#A3F43A] hover:bg-[#8FE12F] text-black disabled:opacity-100 disabled:bg-[#A3F43A] disabled:text-black"
                   disabled={!isStep2Valid}
+                  onClick={handleContinue}
                 >
                   Continue
                   <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
 
-                <button
-                  onClick={() => setStep(1)}
-                  className="text-sm text-muted-foreground w-full"
-                >
-                  ← Back
-                </button>
+                <button onClick={() => setStep(1)} className="text-sm text-muted-foreground w-full">← Back</button>
               </div>
             </div>
           </div>

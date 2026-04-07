@@ -20,7 +20,7 @@ export default function Register() {
       <div className="relative z-10 w-full max-w-4xl grid md:grid-cols-2 gap-8">
         
         {/* Client Registration Option */}
-        <Link href="/client/dashboard" className="group">
+        <Link href="/register/client" className="group">
            <div className="bg-white rounded-[32px] p-10 border-2 border-border shadow-soft hover:border-primary hover:shadow-[0_8px_30px_rgb(176,255,77,0.2)] transition-all duration-300 h-full flex flex-col items-center text-center cursor-pointer relative overflow-hidden bg-gradient-to-b hover:from-primary/5 hover:to-transparent">
               <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center mb-6 text-primary group-hover:scale-110 transition-transform duration-300">
                 <Building2 className="w-10 h-10" />
