@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { 
-  Inbox, 
   CheckCircle2, 
   Clock, 
   ArrowRight, 
@@ -20,7 +19,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 // Mock Data
 const openRequests = [

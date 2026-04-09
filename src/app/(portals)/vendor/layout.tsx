@@ -106,9 +106,9 @@ export default function VendorPortalLayout({ children }: { children: React.React
         {/* Top Header */}
         <header className="h-16 border-b border-border bg-white flex items-center px-8 justify-between shrink-0 sticky top-0 z-10 shadow-sm">
           <div className="flex items-center gap-4">
-            <h1 className="font-semibold text-lg text-[#1A1A1A] capitalize">
-              {pathname.split('/').pop()?.replace(/-/g, ' ') || 'Dashboard'}
-            </h1>
+            <Link href="/vendor/dashboard" className="font-semibold text-lg text-gray-600 capitalize hover:text-[#1A1A1A] transition-colors cursor-pointer">
+              Home
+            </Link>
           </div>
           
           <div className="flex items-center gap-6">
