@@ -262,7 +262,7 @@ export default function CatalogHub() {
                     </div>
                   </div>
 
-                  <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border bg-white flex justify-end gap-3 z-10">
+                  <div className="relative p-4 border-t border-border bg-white flex justify-end gap-3 z-10">
                     <SheetTrigger render={<Button variant="outline" className="w-full sm:w-auto h-11" />}>
                       Cancel
                     </SheetTrigger>
