@@ -13,12 +13,7 @@ import {
   LogOut,
   Settings,
   HelpCircle,
-  FileSpreadsheet,
   CheckCircle2,
-  XCircle,
-  Clock,
-  PlusCircle,
-  FileText,
   AlertCircle
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
