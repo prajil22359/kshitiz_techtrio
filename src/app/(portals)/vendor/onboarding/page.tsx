@@ -145,7 +145,7 @@ export default function VendorOnboarding() {
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-foreground/80 space-y-4 leading-relaxed">
-              <p>TechTrio actively protects both clients and suppliers from fraud.</p>
+              <p>All Product God actively protects both clients and suppliers from fraud.</p>
               <ul className="space-y-3">
                 <li className="flex gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />

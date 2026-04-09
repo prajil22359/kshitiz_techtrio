@@ -9,7 +9,7 @@ export default function ClientPortalLayout({ children }: { children: React.React
         <div className="h-16 flex items-center px-6 border-b border-border">
           <Link href="/" className="flex items-center gap-2 font-bold text-lg text-[#1A1A1A]">
             <PackageSearch className="w-6 h-6 text-primary" />
-            TechTrio Client
+            All Product God Client
           </Link>
         </div>
         <nav className="flex-1 p-4 space-y-1">

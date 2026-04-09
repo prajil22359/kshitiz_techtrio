@@ -19,7 +19,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 const order = {
   id: "PO-2026-8921",
   date: "Oct 12, 2026",
-  client: "TechTrio Procurement Services",
+  client: "All Product God Procurement Services",
   endClient: "Acme Corp (Tower B, Cyber City, DLF Phase 2)",
   status: "Manufacturing",
   value: "₹ 4,50,000",
@@ -62,7 +62,7 @@ export default function OrderDedicatedPage() {
              
              <h3 className="text-2xl font-bold text-[#1A1A1A] mb-2 text-center">Invoice Raised!</h3>
              <p className="text-muted-foreground text-center mb-6">
-               Your invoice has been generated and routed to TechTrio for clearance. It is now visible in your Billing Hub.
+               Your invoice has been generated and routed to All Product God for clearance. It is now visible in your Billing Hub.
              </p>
              
              <div className="w-full bg-gray-50 rounded-xl p-4 border flex items-center justify-between">
@@ -268,7 +268,7 @@ export default function OrderDedicatedPage() {
                           <div className="bg-primary/5 p-4 rounded-xl text-sm border border-primary/20 flex gap-3 text-primary-foreground text-black">
                             <CreditCard className="w-5 h-5 shrink-0 text-primary" />
                             <div>
-                              You are invoicing <span className="font-bold">TechTrio Procurement</span> for Order <span className="font-bold">{order.id}</span>.
+                              You are invoicing <span className="font-bold">All Product God Procurement</span> for Order <span className="font-bold">{order.id}</span>.
                             </div>
                           </div>
                           
@@ -292,7 +292,7 @@ export default function OrderDedicatedPage() {
                               <div className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50 flex flex-col items-center justify-center gap-2 transition-colors group">
                                 <UploadCloud className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
                                 <span className="text-sm text-foreground font-semibold mt-1">Click to upload PDF</span>
-                                <span className="text-[11px] text-muted-foreground max-w-[200px] leading-tight">If not uploaded, TechTrio generates an auto-invoice.</span>
+                                <span className="text-[11px] text-muted-foreground max-w-[200px] leading-tight">If not uploaded, All Product God generates an auto-invoice.</span>
                               </div>
                             </div>
                           </div>
@@ -326,7 +326,7 @@ export default function OrderDedicatedPage() {
                      <User className="w-4 h-4" />
                    </div>
                    <div>
-                     <p className="text-sm font-semibold text-[#1A1A1A]">TechTrio Admin verified PO terms.</p>
+                     <p className="text-sm font-semibold text-[#1A1A1A]">All Product God Admin verified PO terms.</p>
                      <p className="text-xs text-muted-foreground mt-1">Oct 12, 10:45 AM</p>
                    </div>
                  </div>
@@ -345,7 +345,7 @@ export default function OrderDedicatedPage() {
                
                <div className="p-4 border-t bg-gray-50">
                  <div className="relative">
-                   <Input placeholder="Add a note to TechTrio..." className="pr-10 h-10 shadow-sm" />
+                   <Input placeholder="Add a note to All Product God..." className="pr-10 h-10 shadow-sm" />
                    <Button size="icon" variant="ghost" className="absolute right-0 top-0 h-10 w-10 text-muted-foreground hover:text-primary">
                      <ArrowRight className="w-4 h-4" />
                    </Button>

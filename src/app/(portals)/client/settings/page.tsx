@@ -46,7 +46,7 @@ export default function SettingsPage() {
              <div className="grid gap-6">
                 <div className="grid gap-2">
                   <Label htmlFor="companyName">Company Name</Label>
-                  <Input id="companyName" defaultValue="TechTrio Corporation" className="rounded-xl h-12" />
+                  <Input id="companyName" defaultValue="All Product God Corporation" className="rounded-xl h-12" />
                 </div>
                 
                 <div className="grid md:grid-cols-2 gap-6">
@@ -63,7 +63,7 @@ export default function SettingsPage() {
 
                 <div className="grid gap-2">
                   <Label htmlFor="website">Website</Label>
-                  <Input id="website" defaultValue="https://techtrio.com" className="rounded-xl h-12" />
+                  <Input id="website" defaultValue="https://All Product God.com" className="rounded-xl h-12" />
                 </div>
              </div>
 
@@ -82,7 +82,7 @@ export default function SettingsPage() {
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="email">Email Address</Label>
-                  <Input id="email" defaultValue="kshitiz@techtrio.com" type="email" className="rounded-xl h-12" />
+                  <Input id="email" defaultValue="kshitiz@All Product God.com" type="email" className="rounded-xl h-12" />
                 </div>
                 <div className="grid gap-2 md:col-span-2">
                   <Label htmlFor="phone">Phone Number (For Delivery Updates)</Label>

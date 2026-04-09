@@ -105,7 +105,7 @@ export default function NewRequest() {
           </Button>
         </div>
         <p className="text-center text-xs text-muted-foreground mt-4 font-medium">
-          TechTrio AI can make mistakes. Review the structured list before confirming.
+          All Product God AI can make mistakes. Review the structured list before confirming.
         </p>
       </div>
 

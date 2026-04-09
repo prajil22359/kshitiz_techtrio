@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { FcGoogle } from "react-icons/fc";
 import Link from "next/link";
 import { PackageSearch } from "lucide-react";
 
@@ -11,6 +12,15 @@ export default function Login() {
       {/* Abstract Background Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 blur-[120px] rounded-full pointer-events-none" />
 
+      <div>
+        <Link href="/">
+          <Button variant="outline" className="absolute top-6 left-6">
+            <PackageSearch className="w-4 h-4 mr-2" />
+            Back to Home
+          </Button>
+        </Link>
+      </div>
+
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10 text-center flex flex-col items-center">
         <div className="w-16 h-16 bg-white border border-border rounded-2xl shadow-soft flex items-center justify-center mb-6">
            <PackageSearch className="w-8 h-8 text-primary" />
@@ -19,7 +29,7 @@ export default function Login() {
           Welcome back
         </h2>
         <p className="mt-2 text-center text-base text-muted-foreground font-medium">
-          Sign in to your TechTrio dashboard
+          Sign in to your All Product God dashboard
         </p>
       </div>
 
@@ -37,7 +47,7 @@ export default function Login() {
                   type="email"
                   autoComplete="email"
                   required
-                  placeholder="admin@techtrio.com"
+                  placeholder="admin@allproductgod.com"
                 />
               </div>
             </div>
@@ -78,11 +88,16 @@ export default function Login() {
               </div>
             </div>
 
-            <div>
-               <Link href="/client/dashboard">
-                  <Button className="flex w-full justify-center text-base h-14 bg-[#1A1A1A] text-white hover:bg-black font-semibold rounded-2xl mt-4">
+            {/* TODO: Sign In Buttons */}
+            <div className="flex flex-col gap-4">
+               <Link href="/client/dashboard" className="w-full">
+                  <Button className="w-full justify-center text-base h-14 bg-[#1A1A1A] text-white hover:bg-black font-semibold rounded-2xl">
                     Sign in
                   </Button>
+               </Link>
+               <Link href="/client/dashboard" className="w-full h-14 flex items-center justify-center gap-2 border-2 border-border/50 rounded-2xl bg-[#FAFAFA] hover:bg-muted/50 font-semibold text-[#1A1A1A] transition-colors">
+                  <FcGoogle className="w-5 h-5" />
+                  <span className="text-base">Sign in with Google</span>
                </Link>
             </div>
           </form>
@@ -93,7 +108,7 @@ export default function Login() {
                   <div className="w-full border-t border-border" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="bg-white px-2 text-muted-foreground font-medium">New to TechTrio?</span>
+                  <span className="bg-white px-2 text-muted-foreground font-medium">New to All Product God?</span>
                 </div>
              </div>
              

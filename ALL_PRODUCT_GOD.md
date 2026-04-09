@@ -1,11 +1,11 @@
-# TechTrio: Procurement Platform Master PRD
+# All Product God: Procurement Platform Master PRD
 **Version:** 1.0 (Final Draft)
-**Purpose:** North Star document for development teams outlining the aesthetics, technology stack, and core workflows for the TechTrio B2B Procurement Platform.
+**Purpose:** North Star document for development teams outlining the aesthetics, technology stack, and core workflows for the All Product God B2B Procurement Platform.
 
 ---
 
 ## 1. Product Overview & Vision
-This is a premium, client-facing gateway and operational backend that digitizes a managed procurement service. It is **NOT** a self-serve SaaS product. It is the digital operating layer that powers the TechTrio service.
+This is a premium, client-facing gateway and operational backend that digitizes a managed procurement service. It is **NOT** a self-serve SaaS product. It is the digital operating layer that powers the All Product God service.
 
 
 
@@ -81,7 +81,7 @@ The Admin portal is optimizing for speed, vendor comparison, and margin control.
    - **The "Packaging" Step:** The Admin evaluates a bid and assigns it to a presentation tier: **Basic**, **Intermediate**, or **Premium**.
    - **Lock & Collapse:** Once assigned, that winning quote locks to the top of the item's row. The Admin collapses the accordion and moves downwards to Item 2 to repeat the process.
 3. **Margin & Finalize:**
-   - The Admin adds the TechTrio service margin to these curated packages and pushes the final, pristine proposal to the Client.
+   - The Admin adds the All Product God service margin to these curated packages and pushes the final, pristine proposal to the Client.
 4. **Global Oversight:**
    - Master tables for pending Vendor approvals, outstanding invoices, and delayed Shiprocket tracking statuses.
 

@@ -28,7 +28,7 @@ const orders = [
   {
     id: "PO-2026-8921",
     date: "Oct 12, 2026",
-    client: "TechTrio (for Acme Corp)",
+    client: "All Product God (for Acme Corp)",
     items: "Dell Latitude 5430 & 2 more",
     value: "₹ 4,50,000",
     status: "Processing",
@@ -38,7 +38,7 @@ const orders = [
   {
     id: "PO-2026-8924",
     date: "Oct 10, 2026",
-    client: "TechTrio (for Innotech)",
+    client: "All Product God (for Innotech)",
     items: "Herman Miller Aeron Chairs (x12)",
     value: "₹ 11,20,000",
     status: "In Transit",
@@ -48,7 +48,7 @@ const orders = [
   {
     id: "PO-2026-8930",
     date: "Oct 08, 2026",
-    client: "TechTrio (for GlobalSys)",
+    client: "All Product God (for GlobalSys)",
     items: "Cisco Meraki Routers (x5)",
     value: "₹ 2,15,000",
     status: "Partially Invoiced",

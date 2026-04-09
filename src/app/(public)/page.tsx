@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import {FloatingNav} from "@/components/layout/floating-nav";
 import { 
   Bot, PackageSearch, ShieldCheck, Zap, Monitor, 
   Coffee, HardHat, Building2, Store, ArrowRight 
@@ -11,6 +12,7 @@ import {
 export default function Home() {
   return (
     <main className="flex-1 flex flex-col bg-[#FAFAFA] min-h-screen font-sans overflow-x-hidden">
+      <FloatingNav />
       
       {/* 1. Hero Section with Floating UI Cards */}
       <section className="relative pt-48 pb-32 px-6 flex flex-col items-center justify-center min-h-[90vh]">
@@ -26,7 +28,7 @@ export default function Home() {
               className="inline-flex items-center rounded-full border border-border bg-white px-4 py-1.5 text-sm font-semibold shadow-sm text-muted-foreground mx-auto lg:mx-0"
             >
               <span className="flex h-2.5 w-2.5 rounded-full bg-primary mr-2.5 animate-pulse"></span>
-              TechTrio Operations Layer
+              All Product God Operations Layer
             </motion.div>
 
             <motion.h1 
@@ -153,8 +155,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 3. Services Grid */}
-      <section id="services" className="py-24 px-6 bg-[#FAFAFA]">
+      {/* 3. Domain Grid */}
+      <section id="domain" className="py-24 px-6 bg-[#FAFAFA]">
         <div className="max-w-6xl mx-auto">
           <motion.h2 
             initial={{ opacity: 0, y: 30 }}
@@ -205,11 +207,11 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 4. For Businesses vs 5. For Vendors Split */}
+      {/* 4. Services*/}
       <section className="py-24 px-0 bg-white border-y border-border">
         <div className="max-w-7xl mx-auto w-full grid lg:grid-cols-2">
           
-          <div id="businesses" className="p-16 lg:pr-24 lg:border-r border-border flex flex-col justify-center">
+          <div id="services" className="p-16 lg:pr-24 lg:border-r border-border flex flex-col justify-center">
             <Building2 className="w-16 h-16 text-[#1A1A1A] mb-8" />
             <h2 className="text-4xl font-bold text-[#1A1A1A] mb-6">For Businesses</h2>
             <p className="text-xl text-muted-foreground font-medium mb-12">Stop wasting 40 hours a week chasing suppliers. You tell the concierge what you need, and we return with a polished selection of quotes you can trust.</p>
@@ -218,12 +220,12 @@ export default function Home() {
               <li className="flex items-center gap-4 text-lg font-semibold text-[#1A1A1A]"><div className="w-3 h-3 rounded-full bg-primary" /> End-to-end Logistics via Shiprocket</li>
               <li className="flex items-center gap-4 text-lg font-semibold text-[#1A1A1A]"><div className="w-3 h-3 rounded-full bg-primary" /> Unified Invoicing</li>
             </ul>
-            <Link href="/register">
+            <Link href="/register/client">
               <Button size="lg" className="rounded-full font-bold shadow-soft">Create Client Profile</Button>
             </Link>
           </div>
 
-          <div id="vendors" className="p-16 lg:pl-24 bg-[#1A1A1A] text-white flex flex-col justify-center relative overflow-hidden">
+          <div id="services" className="p-16 lg:pl-24 bg-[#1A1A1A] text-white flex flex-col justify-center relative overflow-hidden">
             <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: "linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)", backgroundSize: "30px 30px" }} />
             <Store className="w-16 h-16 text-primary mb-8 relative z-10" />
             <h2 className="text-4xl font-bold text-white mb-6 relative z-10">For Vendors</h2>
@@ -234,7 +236,7 @@ export default function Home() {
                <li className="flex items-center gap-4 text-lg font-semibold text-white"><div className="w-3 h-3 rounded-full bg-white" /> Guaranteed payment cycles</li>
             </ul>
             <div className="relative z-10">
-               <Link href="/register">
+               <Link href="/register/vendor">
                  <Button size="lg" variant="outline" className="rounded-full font-bold text-[#1A1A1A] border-white hover:bg-white hover:text-black transition-colors">Apply to Network</Button>
                </Link>
             </div>
@@ -243,7 +245,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 6. Blog Preview Grid */}
+      {/* 5. Blog Preview Grid */}
       <section id="blog" className="py-24 px-6 bg-[#FAFAFA]">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-end justify-between mb-16">
@@ -260,7 +262,7 @@ export default function Home() {
                  <div className="w-full h-full bg-gradient-to-br from-zinc-200 to-zinc-300 group-hover:scale-105 transition-transform duration-500"/>
                </div>
                <span className="text-primary font-bold text-sm tracking-wider uppercase mb-2 block">Release</span>
-               <h4 className="text-2xl font-bold text-[#1A1A1A] mb-3 group-hover:text-primary transition-colors">TechTrio Engine v2.0 is live</h4>
+               <h4 className="text-2xl font-bold text-[#1A1A1A] mb-3 group-hover:text-primary transition-colors">All Product God Engine v2.0 is live</h4>
                <p className="text-muted-foreground">A deeper look into how our AI concierge structures untamed raw data into standard manifests.</p>
              </div>
              
@@ -305,7 +307,7 @@ export default function Home() {
             <div className="col-span-2 lg:col-span-2">
                <Link href="/" className="flex items-center gap-2 font-bold text-2xl text-white mb-6">
                  <PackageSearch className="w-8 h-8 text-primary" />
-                 TechTrio
+                 All Product God
                </Link>
                <p className="text-zinc-500 font-medium max-w-sm mb-8">The intelligent B2B managed service locking buyers and premium vendors into a unified, high-speed ecosystem.</p>
             </div>
@@ -341,7 +343,7 @@ export default function Home() {
          </div>
 
          <div className="max-w-6xl mx-auto pt-8 border-t border-zinc-900 flex flex-col md:flex-row items-center justify-between text-zinc-600 font-medium">
-            <p>© 2026 TechTrio Operations Ltd. All rights reserved.</p>
+            <p>© 2026 All Product God Operations Ltd. All rights reserved.</p>
             <div className="flex gap-6 mt-4 md:mt-0">
                <span>Twitter</span>
                <span>LinkedIn</span>

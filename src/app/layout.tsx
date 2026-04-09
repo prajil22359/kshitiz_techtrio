@@ -8,7 +8,7 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "TechTrio - Modern Procurement",
+  title: "All Product God - Modern Procurement",
   description: "A premium, sophisticated B2B procurement platform.",
 };
 

@@ -18,7 +18,7 @@ import { Card } from "@/components/ui/card";
 const completedOrders = [
   {
     id: "PO-2026-8802",
-    client: "TechTrio (for Globex)",
+    client: "All Product God (for Globex)",
     completionDate: "Sep 28, 2026",
     value: "₹ 8,40,000",
     paymentStatus: "Settled in Full",
@@ -27,7 +27,7 @@ const completedOrders = [
   },
   {
     id: "PO-2026-8795",
-    client: "TechTrio (for Soylent Corp)",
+    client: "All Product God (for Soylent Corp)",
     completionDate: "Sep 15, 2026",
     value: "₹ 1,12,500",
     paymentStatus: "Settled in Full",
@@ -36,7 +36,7 @@ const completedOrders = [
   },
   {
     id: "PO-2026-8815",
-    client: "TechTrio (for Initech)",
+    client: "All Product God (for Initech)",
     completionDate: "Oct 01, 2026",
     value: "₹ 3,50,000",
     paymentStatus: "Pending clearing",
@@ -45,7 +45,7 @@ const completedOrders = [
   },
   {
     id: "PO-2026-8740",
-    client: "TechTrio (for Massive Dynamic)",
+    client: "All Product God (for Massive Dynamic)",
     completionDate: "Aug 22, 2026",
     value: "₹ 14,00,000",
     paymentStatus: "Settled in Full",

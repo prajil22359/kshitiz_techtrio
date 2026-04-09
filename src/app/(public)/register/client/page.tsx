@@ -54,7 +54,7 @@ export default function ClientRegistration() {
             <div className="bg-[#1A1A1A] p-2 rounded-xl">
               <Building2 className="w-6 h-6 text-primary" />
             </div>
-            TechTrio
+            All Product God
           </Link>
 
           <div className="mt-32 max-w-lg">
@@ -63,7 +63,7 @@ export default function ClientRegistration() {
             </h1>
 
             <p className="mt-6 text-xl text-muted-foreground">
-              Join enterprises and startups streamlining procurement with TechTrio.
+              Join enterprises and startups streamlining procurement with All Product God.
             </p>
 
             <div className="mt-12 space-y-6">
@@ -83,7 +83,7 @@ export default function ClientRegistration() {
           </div>
         </div>
 
-        <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} TechTrio Corp.</p>
+        <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} All Product God Corp.</p>
       </div>
 
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 z-10">

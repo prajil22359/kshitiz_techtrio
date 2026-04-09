@@ -36,7 +36,7 @@ const pendingInvoices = [
     po: "PO-2026-8902",
     submittedOn: "Oct 09, 2026",
     value: "₹ 1,12,000",
-    status: "Awaiting TechTrio Approval",
+    status: "Awaiting All Product God Approval",
     eta: "Estimating..."
   }
 ];
@@ -186,7 +186,7 @@ export default function VendorBillingHub() {
               <div className="p-4 bg-gray-50 border-t flex items-start gap-3">
                  <AlertCircle className="w-4 h-4 mt-0.5 text-muted-foreground" />
                  <p className="text-xs text-muted-foreground font-medium">
-                   TechTrio Procurement Services runs batch clearances every Tuesday and Friday. Funds typically reflect in your registered bank account within 24 hours of clearance.
+                   All Product God Procurement Services runs batch clearances every Tuesday and Friday. Funds typically reflect in your registered bank account within 24 hours of clearance.
                  </p>
               </div>
            </Card>

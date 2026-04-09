@@ -49,7 +49,7 @@ export default function VendorRegistration() {
             <div className="bg-[#1A1A1A] p-2 rounded-xl">
               <Store className="w-6 h-6 text-primary" />
             </div>
-            TechTrio
+            All Product God
           </Link>
 
           <div className="mt-32 max-w-lg">
@@ -79,7 +79,7 @@ export default function VendorRegistration() {
         </div>
 
         <p className="text-sm text-muted-foreground">
-          © {new Date().getFullYear()} TechTrio Corp.
+          © {new Date().getFullYear()} All Product God Corp.
         </p>
       </div>
 

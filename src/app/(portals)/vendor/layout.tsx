@@ -45,7 +45,7 @@ export default function VendorPortalLayout({ children }: { children: React.React
             <div className="bg-primary/20 p-1.5 rounded-lg">
               <Store className="w-5 h-5 text-primary" />
             </div>
-            TechTrio
+            All Product God
           </Link>
         </div>
         

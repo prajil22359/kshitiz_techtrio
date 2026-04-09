@@ -29,9 +29,8 @@ export function FloatingNav() {
 
   const navLinks = [
     { name: "How It Works", href: "/#how-it-works", id: "how-it-works" },
+    { name: "Domain", href: "/#domain", id: "domain" },
     { name: "Services", href: "/#services", id: "services" },
-    { name: "For Businesses", href: "/#businesses", id: "businesses" },
-    { name: "For Vendors", href: "/#vendors", id: "vendors" },
     { name: "Blog", href: "/#blog", id: "blog" },
   ];
 
@@ -42,24 +41,24 @@ export function FloatingNav() {
       transition={{ duration: 0.5, ease: "easeOut" }}
       className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-6xl rounded-full bg-white/80 backdrop-blur-md border border-white/20 shadow-soft px-8 py-4 flex items-center justify-between"
     >
-      <Link href="/" className="flex items-center gap-2 font-bold text-xl text-[#1A1A1A]">
+      <Link href="/" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="flex items-center gap-2 font-bold text-xl text-[#1A1A1A]">
         <PackageSearch className="w-6 h-6 text-primary" />
-        TechTrio
+        All Product God
       </Link>
       
       <nav className="hidden md:flex items-center gap-2 text-sm font-semibold">
         {navLinks.map((link) => (
-          <Link 
+          <button 
             key={link.id} 
-            href={link.href} 
-            className={`px-4 py-2 rounded-full transition-all duration-300 ${
+            onClick={() => window.scrollTo({ top: document.getElementById(link.id)?.offsetTop, behavior: "smooth" })}
+            className={`px-4 py-2 rounded-full transition-all duration-300 shadow-soft ${
               activeSection === link.id 
-                ? "bg-[#1A1A1A] text-white shadow-soft scale-105" 
+                ? "bg-[#1A1A1A] text-white scale-105" 
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
             }`}
           >
             {link.name}
-          </Link>
+          </button>
         ))}
       </nav>
 

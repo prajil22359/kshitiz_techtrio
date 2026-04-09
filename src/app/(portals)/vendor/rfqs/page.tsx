@@ -108,7 +108,7 @@ export default function VendorRFQHub() {
              
              <h3 className="text-2xl font-bold text-[#1A1A1A] mb-2 text-center">Quote Submitted!</h3>
              <p className="text-muted-foreground text-center mb-6 text-sm">
-               Your binding bid has been securely routed to TechTrio Admins. You will be notified instantly if you win the contract.
+               Your binding bid has been securely routed to All Product God Admins. You will be notified instantly if you win the contract.
              </p>
              
              <div className="mt-4 flex items-center gap-2 text-primary font-bold text-sm bg-primary/10 px-4 py-2 rounded-full">
@@ -198,7 +198,7 @@ export default function VendorRFQHub() {
                             <h4 className="font-bold text-[#1A1A1A] mb-3 text-sm uppercase tracking-wider text-muted-foreground">Requisition Details</h4>
                             <p className="text-lg font-semibold text-foreground">{rfq.items}</p>
                             <p className="text-sm text-muted-foreground mt-2 border-t pt-2 border-border/50">
-                              TechTrio requires a binding quote including standard shipping to Gurugram, HR.
+                              All Product God requires a binding quote including standard shipping to Gurugram, HR.
                             </p>
                           </div>
 
@@ -253,7 +253,7 @@ export default function VendorRFQHub() {
 
                              <div className="bg-amber-50 p-3 rounded-lg flex gap-3 text-amber-900 border border-amber-200 mt-4">
                                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                               <p className="text-xs font-medium">By submitting, you agree to fulfill the order at these exact rates if accepted by TechTrio within 48 hours.</p>
+                               <p className="text-xs font-medium">By submitting, you agree to fulfill the order at these exact rates if accepted by All Product God within 48 hours.</p>
                              </div>
 
                              <Button className="w-full h-12 text-base font-bold shadow-sm" onClick={handleSubmitQuote}>
