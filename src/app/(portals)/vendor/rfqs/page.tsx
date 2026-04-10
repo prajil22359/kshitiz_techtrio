@@ -111,7 +111,7 @@ export default function VendorRFQHub() {
              </p>
              
              <div className="mt-4 flex items-center gap-2 text-primary font-bold text-sm bg-primary/10 px-4 py-2 rounded-full">
-                Moving to "Active Bids" <ArrowRight className="w-4 h-4 animate-pulse" />
+               Moving to “Active Bids” <ArrowRight className="w-4 h-4 animate-pulse" />
              </div>
            </div>
         </div>

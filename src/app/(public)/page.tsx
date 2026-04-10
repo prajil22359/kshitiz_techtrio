@@ -149,7 +149,7 @@ export default function Home() {
                  <ShieldCheck className="w-10 h-10 text-black" />
               </div>
               <h3 className="text-2xl font-bold text-[#1A1A1A] mb-3">3. Curated Proposals</h3>
-              <p className="text-muted-foreground text-lg">Clients receive isolated "Basic", "Intermediate", and "Premium" options. Single-click to approve and dispatch.</p>
+              <p className="text-muted-foreground text-lg">Clients receive isolated “Basic”, “Intermediate”, and “Premium” options. Single-click to approve and dispatch.</p>
             </motion.div>
           </div>
         </div>

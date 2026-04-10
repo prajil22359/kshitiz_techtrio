@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ShieldCheck, UploadCloud, CheckCircle2, AlertTriangle, FileText, Landmark, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function VendorOnboarding() {
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -25,7 +25,7 @@ export default function VendorOnboarding() {
               <ShieldCheck className="w-6 h-6 text-emerald-600 mt-1 shrink-0" />
               <div>
                 <h4 className="font-semibold text-foreground">What happens next?</h4>
-                <p className="text-sm text-muted-foreground mt-1">Once approved, the "Unverified" restriction will be lifted and you'll immediately start receiving relevant RFQs in your dashboard.</p>
+                <p className="text-sm text-muted-foreground mt-1">Once approved, the &quot;Unverified&quot; restriction will be lifted and you&rsquo;ll immediately start receiving relevant RFQs in your dashboard.</p>
               </div>
             </div>
             <Button variant="outline" className="mt-8" onClick={() => {

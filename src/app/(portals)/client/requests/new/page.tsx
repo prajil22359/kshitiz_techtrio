@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Bot, User, ArrowRight, CornerDownLeft, Sparkles, CheckCircle2 } from "lucide-react";
+import { Bot, User, CornerDownLeft, Sparkles, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 
 export default function NewRequest() {
@@ -38,8 +37,8 @@ export default function NewRequest() {
           </div>
           <div className="space-y-4 w-full">
             <div className="bg-white border border-border p-5 rounded-[24px] rounded-bl-sm shadow-soft text-[#1A1A1A] text-base leading-relaxed">
-              Got it! A premium 20-seat cafe setup in Mumbai. I've broken down your request into a structured item manifest based on high-end branch standards. <br/><br/>
-              Please review the list below. If it looks correct, we'll dispatch this to our verified vendors and bring you back curated options.
+              Got it! A premium 20-seat cafe setup in Mumbai. I&rsquo;ve broken down your request into a structured item manifest based on high-end branch standards. <br/><br/>
+              Please review the list below. If it looks correct, we&rsquo;ll dispatch this to our verified vendors and bring you back curated options.
             </div>
 
             {/* Structured Output Card */}

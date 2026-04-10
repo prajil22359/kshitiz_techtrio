@@ -1,14 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Building2, ArrowRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
+
+type AuthUser = {
+  id: string;
+  email?: string | null;
+  user_metadata?: {
+    full_name?: string;
+    first_name?: string;
+    last_name?: string;
+  };
+};
 
 export default function ClientRegistration() {
   const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+
   const router = useRouter();
 
   const [formData, setFormData] = useState({
@@ -18,30 +33,111 @@ export default function ClientRegistration() {
     password: "",
     fullName: "",
     companyName: "",
-    phone: ""
+    phone: "",
   });
 
-  const handleChange = (e: any) => {
+  useEffect(() => {
+    const loadSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      const user = data.session?.user;
+      if (user) {
+        setAuthUser(user);
+        setFormData((prev) => ({
+          ...prev,
+          email: user.email ?? prev.email,
+          fullName:
+            user.user_metadata?.full_name ??
+            `${user.user_metadata?.first_name ?? ""} ${user.user_metadata?.last_name ?? ""}`.trim() ??
+            prev.fullName,
+        }));
+        setStep(2);
+      }
+    };
+
+    loadSession();
+  }, []);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const goToStep2 = () => {
-    setFormData({
-      ...formData,
-      fullName: `${formData.firstName} ${formData.lastName}`.trim()
-    });
-    setStep(2);
+  const createAuthAccount = async () => {
+    setLoading(true);
+    setMessage("");
+
+    try {
+      const fullName = `${formData.firstName} ${formData.lastName}`.trim();
+
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            full_name: fullName,
+            role: "client",
+          },
+        },
+      });
+
+      if (error) {
+        setMessage(error.message);
+        return;
+      }
+
+      if (!data.user) {
+        setMessage("Account created. Please verify your email, then continue.");
+        return;
+      }
+
+      setAuthUser(data.user);
+      setFormData((prev) => ({ ...prev, fullName }));
+      setStep(2);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleContinue = async () => {
+    if (!authUser) {
+      setMessage("Please create the auth account first.");
+      return;
+    }
+
+    setLoading(true);
+    setMessage("");
+
+    try {
+      const { error } = await supabase.from("users").upsert(
+        [
+          {
+            id: authUser.id,
+            email: formData.email || authUser.email || "",
+            name: formData.fullName,
+            role: "client",
+            company_name: formData.companyName,
+            phone: formData.phone,
+          },
+        ],
+        { onConflict: "id" }
+      );
+
+      if (error) {
+        setMessage(error.message);
+        return;
+      }
+
+      router.push("/client/dashboard");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const isStep1Valid =
     formData.firstName && formData.lastName && formData.email && formData.password;
 
   const isStep2Valid = formData.fullName && formData.companyName && formData.phone;
-
-  const handleContinue = () => {
-    // For now simulate successful registration and navigate to client dashboard
-    router.push("/client/dashboard");
-  };
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] flex relative overflow-hidden">
@@ -70,7 +166,7 @@ export default function ClientRegistration() {
               {[
                 "Post requirements and get curated supplier bids",
                 "Smart matching & assisted sourcing",
-                "Payment protection and reliable fulfilment"
+                "Payment protection and reliable fulfilment",
               ].map((b, i) => (
                 <div key={i} className="flex items-center gap-4 font-medium">
                   <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
@@ -108,6 +204,7 @@ export default function ClientRegistration() {
                         placeholder="John"
                         className="h-12 rounded-2xl bg-gray-50/70 border-gray-200 shadow-sm focus-visible:ring-2 focus-visible:ring-primary/30"
                         onChange={handleChange}
+                        value={formData.firstName}
                       />
                     </div>
 
@@ -118,6 +215,7 @@ export default function ClientRegistration() {
                         placeholder="Doe"
                         className="h-12 rounded-2xl bg-gray-50/70 border-gray-200 shadow-sm focus-visible:ring-2 focus-visible:ring-primary/30"
                         onChange={handleChange}
+                        value={formData.lastName}
                       />
                     </div>
                   </div>
@@ -130,6 +228,7 @@ export default function ClientRegistration() {
                       placeholder="john@email.com"
                       className="h-12 rounded-2xl bg-gray-50/70 border-gray-200 shadow-sm focus-visible:ring-2 focus-visible:ring-primary/30"
                       onChange={handleChange}
+                      value={formData.email}
                     />
                   </div>
 
@@ -141,13 +240,14 @@ export default function ClientRegistration() {
                       placeholder="••••••••"
                       className="h-12 rounded-2xl bg-gray-50/70 border-gray-200 shadow-sm focus-visible:ring-2 focus-visible:ring-primary/30"
                       onChange={handleChange}
+                      value={formData.password}
                     />
                   </div>
 
                   <Button
                     className="w-full h-12 text-base font-semibold mt-4 shadow-sm group bg-[#A3F43A] hover:bg-[#8FE12F] text-black disabled:opacity-100 disabled:bg-[#A3F43A] disabled:text-black"
-                    onClick={goToStep2}
-                    disabled={!isStep1Valid}
+                    onClick={createAuthAccount}
+                    disabled={!isStep1Valid || loading}
                   >
                     Create Client Profile
                     <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -162,7 +262,16 @@ export default function ClientRegistration() {
                   <Button
                     variant="outline"
                     className="w-full h-12 rounded-2xl flex items-center gap-3 border-gray-200 bg-white shadow-sm hover:bg-gray-50 transition-all duration-200"
-                    onClick={goToStep2}
+                    onClick={async () => {
+                      await supabase.auth.signInWithOAuth({
+                        provider: "google",
+                        options: {
+                          redirectTo: `${window.location.origin}/register/client`,
+                        },
+                      });
+                    }}
+                    type="button"
+                    disabled={loading}
                   >
                     <img
                       src="https://www.svgrepo.com/show/475656/google-color.svg"
@@ -173,7 +282,7 @@ export default function ClientRegistration() {
                   </Button>
 
                   <p className="pt-2 text-sm text-center text-muted-foreground">
-                    Already registered?{' '}
+                    Already registered?{" "}
                     <Link href="/login" className="font-semibold text-[#1A1A1A] hover:underline">
                       Sign in
                     </Link>
@@ -199,12 +308,13 @@ export default function ClientRegistration() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-[#1A1A1A]">Bussiness Name</label>
+                  <label className="block text-sm font-semibold text-[#1A1A1A]">Business Name</label>
                   <Input
-                    name="Business Name"
+                    name="companyName"
                     placeholder="e.g. Acme Corp."
                     className="h-12 bg-gray-50/50"
                     onChange={handleChange}
+                    value={formData.companyName}
                   />
                 </div>
 
@@ -212,20 +322,32 @@ export default function ClientRegistration() {
                   <label className="text-sm font-semibold text-foreground">Phone Number</label>
                   <div className="flex gap-2">
                     <Input disabled placeholder="+91" className="h-12 w-20 bg-gray-100 text-center font-medium" />
-                    <Input name="phone" type="tel" placeholder="98765 43210" className="h-12 flex-1 bg-gray-50/50" onChange={handleChange} />
+                    <Input
+                      name="phone"
+                      type="tel"
+                      placeholder="98765 43210"
+                      className="h-12 flex-1 bg-gray-50/50"
+                      onChange={handleChange}
+                      value={formData.phone}
+                    />
                   </div>
                 </div>
 
                 <Button
                   className="w-full h-12 text-base font-semibold mt-4 shadow-sm group bg-[#A3F43A] hover:bg-[#8FE12F] text-black disabled:opacity-100 disabled:bg-[#A3F43A] disabled:text-black"
-                  disabled={!isStep2Valid}
+                  disabled={!isStep2Valid || loading}
                   onClick={handleContinue}
+                  type="button"
                 >
                   Continue
                   <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
 
-                <button onClick={() => setStep(1)} className="text-sm text-muted-foreground w-full">← Back</button>
+                <button onClick={() => setStep(1)} className="text-sm text-muted-foreground w-full" type="button">
+                  ← Back
+                </button>
+
+                {message ? <p className="text-sm text-rose-600 text-center">{message}</p> : null}
               </div>
             </div>
           </div>

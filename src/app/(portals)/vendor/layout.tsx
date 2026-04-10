@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { 
   Store, 
   LayoutDashboard, 
@@ -21,11 +21,7 @@ import { Button } from "@/components/ui/button";
 
 export default function VendorPortalLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [isVerified, setIsVerified] = useState(false);
-
-  useEffect(() => {
-    setIsVerified(localStorage.getItem("vendor_verified") === "true");
-  }, [pathname]);
+  const [isVerified] = useState<boolean>(() => (typeof window !== "undefined" ? localStorage.getItem("vendor_verified") === "true" : false));
 
   const isActive = (path: string) => {
     return pathname === path || pathname.startsWith(`${path}/`);
