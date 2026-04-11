@@ -1,114 +1,148 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { Bot, User, Sparkles, CheckCircle2, Send } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Bot, User, ArrowRight, CornerDownLeft, Sparkles, CheckCircle2 } from "lucide-react";
-import Link from "next/link";
+
+type Message = {
+  id: number;
+  role: "user" | "assistant";
+  content: string;
+};
+
+const demoPrompt = "I need to set up a new premium 20-seat cafe in our Mumbai office branch. We need everything from a commercial espresso machine down to tables and ambient lighting. It needs to look high-end, similar to a Blue Tokai. We need this within 14 days.";
+const demoResponse = "api implementation remaining only a test output";
 
 export default function NewRequest() {
+  const [draft, setDraft] = useState("");
+  const [messages, setMessages] = useState<Message[]>([]);
+
+  const previewTitle = useMemo(() => {
+    return messages.length > 0 ? "Live Request Preview" : "Start a request";
+  }, [messages.length]);
+
+  const sendDemoMessage = () => {
+    const userMessage = draft.trim() || demoPrompt;
+
+    {/* TODO: Implement API call to send message */}
+
+    setMessages((currentMessages) => [
+      ...currentMessages,
+      {
+        id: Date.now(),
+        role: "user",
+        content: userMessage,
+      },
+      {
+        id: Date.now() + 1,
+        role: "assistant",
+        content: demoResponse,
+      },
+    ]);
+
+    setDraft("");
+  };
+
   return (
-    <div className="max-w-4xl mx-auto h-[calc(100vh-8rem)] flex flex-col relative px-4">
-      
-      {/* Header */}
-      <div className="pb-6 border-b border-border flex items-center justify-between shrink-0">
-        <div>
-          <h2 className="text-2xl font-bold text-[#1A1A1A] flex items-center gap-2">
-            <Sparkles className="w-6 h-6 text-primary" />
-            AI Concierge
-          </h2>
-          <p className="text-muted-foreground text-sm mt-1">Describe exactly what you need. Let us do the heavy lifting.</p>
+    <div className="mx-auto flex h-[calc(100vh-8rem)] max-w-5xl flex-col px-4">
+      <div className="shrink-0 border-b border-border pb-6">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h2 className="flex items-center gap-2 text-2xl font-bold text-[#1A1A1A]">
+              <Sparkles className="h-6 w-6 text-primary" />
+              AI Concierge
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Describe what you need, then press send to generate a clean demo preview.
+            </p>
+          </div>
+          <Badge variant="outline" className="h-fit rounded-full px-3 py-1 text-[11px] uppercase tracking-wider">
+            {previewTitle}
+          </Badge>
         </div>
       </div>
 
-      {/* Chat Area (Auto-scrolling simulation) */}
-      <div className="flex-1 overflow-y-auto py-8 space-y-8 no-scrollbar pb-32">
-        {/* User Prompt */}
-        <div className="flex gap-4 items-start max-w-[85%] ml-auto">
-          <div className="bg-[#1A1A1A] text-white p-5 rounded-[24px] rounded-br-sm shadow-sm text-base leading-relaxed">
-            I need to set up a new premium 20-seat cafe in our Mumbai office branch. We need everything from a commercial espresso machine down to tables and ambient lighting. It needs to look high-end, similar to a Blue Tokai. We need this within 14 days.
-          </div>
-          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center shrink-0 border border-border">
-            <User className="w-5 h-5 text-muted-foreground" />
-          </div>
-        </div>
-
-        {/* AI Response thinking */}
-        <div className="flex gap-4 items-start max-w-[85%]">
-          <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center shrink-0 border border-primary/30">
-            <Bot className="w-5 h-5 text-primary" />
-          </div>
-          <div className="space-y-4 w-full">
-            <div className="bg-white border border-border p-5 rounded-[24px] rounded-bl-sm shadow-soft text-[#1A1A1A] text-base leading-relaxed">
-              Got it! A premium 20-seat cafe setup in Mumbai. I've broken down your request into a structured item manifest based on high-end branch standards. <br/><br/>
-              Please review the list below. If it looks correct, we'll dispatch this to our verified vendors and bring you back curated options.
+      <div className="flex-1 overflow-y-auto py-6">
+        <div className="space-y-5">
+          {messages.length === 0 ? (
+            <div className="grid min-h-[calc(100vh-22rem)] place-items-center rounded-[28px] border border-dashed border-border bg-white/70 px-6 text-center shadow-sm">
+              <div className="max-w-xl space-y-4">
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <Bot className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-[#1A1A1A]">Ready to build your request</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Use the composer below to add a message. The preview area will update with a user bubble and a demo assistant response.
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-border bg-[#FAFAFA] p-4 text-left text-sm text-[#1A1A1A] shadow-sm">
+                  <span className="mb-2 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Example prompt
+                  </span>
+                  <p>{demoPrompt}</p>
+                </div>
+              </div>
             </div>
+          ) : (
+            messages.map((message) => (
+              <div
+                key={message.id}
+                className={`flex items-start gap-3 ${message.role === "user" ? "ml-auto max-w-[88%] flex-row-reverse" : "max-w-[88%]"}`}
+              >
+                <div
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border ${message.role === "user" ? "border-border bg-muted" : "border-primary/30 bg-primary/15"}`}
+                >
+                  {message.role === "user" ? (
+                    <User className="h-5 w-5 text-muted-foreground" />
+                  ) : (
+                    <Bot className="h-5 w-5 text-primary" />
+                  )}
+                </div>
 
-            {/* Structured Output Card */}
-            <div className="bg-white border border-border rounded-[24px] shadow-sm overflow-hidden">
-               <div className="bg-[#FAFAFA] border-b border-border px-6 py-4 flex justify-between items-center">
-                 <h4 className="font-semibold text-[#1A1A1A]">Structured Item Manifest</h4>
-                 <Badge variant="outline">Auto-generated</Badge>
-               </div>
-               <div className="divide-y divide-border">
-                 <div className="p-4 px-6 flex items-center justify-between hover:bg-muted/30 transition-colors">
-                   <div>
-                     <p className="font-medium text-[#1A1A1A]">Commercial Espresso Machine</p>
-                     <p className="text-sm text-muted-foreground">Category: Appliances</p>
-                   </div>
-                   <div className="font-semibold text-[#1A1A1A]">x1</div>
-                 </div>
-                 <div className="p-4 px-6 flex items-center justify-between hover:bg-muted/30 transition-colors">
-                   <div>
-                     <p className="font-medium text-[#1A1A1A]">Premium Wooden Cafe Tables (Small)</p>
-                     <p className="text-sm text-muted-foreground">Category: Furniture</p>
-                   </div>
-                   <div className="font-semibold text-[#1A1A1A]">x10</div>
-                 </div>
-                 <div className="p-4 px-6 flex items-center justify-between hover:bg-muted/30 transition-colors">
-                   <div>
-                     <p className="font-medium text-[#1A1A1A]">Upholstered Premium Chairs</p>
-                     <p className="text-sm text-muted-foreground">Category: Furniture</p>
-                   </div>
-                   <div className="font-semibold text-[#1A1A1A]">x20</div>
-                 </div>
-                 <div className="p-4 px-6 flex items-center justify-between hover:bg-muted/30 transition-colors">
-                   <div>
-                     <p className="font-medium text-[#1A1A1A]">Commercial Coffee Grinder</p>
-                     <p className="text-sm text-muted-foreground">Category: Appliances</p>
-                   </div>
-                   <div className="font-semibold text-[#1A1A1A]">x2</div>
-                 </div>
-               </div>
-               <div className="p-4 bg-[#FAFAFA] flex justify-end items-center gap-3">
-                 <Button variant="ghost" className="text-muted-foreground">Edit List</Button>
-                 <Link href="/client/dashboard">
-                   <Button className="rounded-full shadow-sm pr-4">
-                     Confirm & Send to Triage <CheckCircle2 className="w-4 h-4 ml-2" />
-                   </Button>
-                 </Link>
-               </div>
-            </div>
-          </div>
+                <div
+                  className={`rounded-[24px] px-5 py-4 text-sm leading-relaxed shadow-sm ${message.role === "user" ? "rounded-br-sm bg-[#1A1A1A] text-white" : "rounded-bl-sm border border-border bg-white text-[#1A1A1A]"}`}
+                >
+                  {message.content}
+                  {message.role === "assistant" && (
+                    <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-emerald-700">
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      Demo output
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
-      {/* Sticky Bottom Input Bar */}
-      <div className="absolute bottom-6 left-0 w-full px-4">
-        <div className="bg-white rounded-full p-2 pl-6 pr-2 shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-border flex items-center gap-4">
-          <input 
-            type="text" 
-            placeholder="Type your request here..." 
-            className="flex-1 bg-transparent border-none focus:ring-0 outline-none text-[#1A1A1A] placeholder:text-muted-foreground text-base"
-            disabled
-          />
-          <Button size="icon" className="rounded-full shrink-0 h-10 w-10">
-            <CornerDownLeft className="w-4 h-4" />
-          </Button>
+      <div className="shrink-0 border-t border-border bg-[#FAFAFA]/95 pt-4 backdrop-blur-sm">
+        <div className="rounded-[28px] border border-border bg-white p-2 pl-4 pr-2 shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
+          <div className="flex items-center gap-3">
+            <Input
+              value={draft}
+              onChange={(event) => setDraft(event.target.value)}
+              placeholder="Type your request here..."
+              className="h-11 flex-1 border-0 bg-transparent text-base shadow-none placeholder:text-muted-foreground focus-visible:ring-0"
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  sendDemoMessage();
+                }
+              }}
+            />
+            <Button onClick={sendDemoMessage} size="icon" className="h-11 w-11 rounded-full shrink-0">
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
-        <p className="text-center text-xs text-muted-foreground mt-4 font-medium">
-          All Product God AI can make mistakes. Review the structured list before confirming.
+        <p className="mt-4 text-center text-xs font-medium text-muted-foreground">
+          This is a demo preview. The assistant response is a placeholder until API implementation is ready.
         </p>
       </div>
-
     </div>
   );
 }

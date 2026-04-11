@@ -2,7 +2,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Search, Filter, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
-import { Input } from "@/components/ui/input";
 
 export default function RequestsPage() {
   return (
@@ -15,14 +14,14 @@ export default function RequestsPage() {
       </div>
 
       {/* Toolbar */}
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-4 bg-white p-2 rounded-2xl border border-border shadow-soft w-full max-w-2xl">
+      <div className="flex items-center gap-4 justify-between">
+        <div className="flex items-center gap-4 bg-white p-3 rounded-2xl border border-border shadow-soft flex-1 max-w-2.5xl">
           <div className="flex-1 flex items-center gap-2 px-3">
-            <Search className="w-5 h-5 text-muted-foreground" />
+            <Search className="w-6 h-5 text-muted-foreground" />
             <input 
                type="text" 
                placeholder="Search by ID or keyword..." 
-               className="w-full bg-transparent border-none outline-none text-sm placeholder:text-muted-foreground"
+               className="w-full bg-transparent border-none outline-none text-base placeholder:text-muted-foreground"
             />
           </div>
           <div className="w-px h-6 bg-border mx-2"></div>
@@ -30,8 +29,8 @@ export default function RequestsPage() {
             <Filter className="w-4 h-4" /> Filter
           </Button>
         </div>
-        <Link href="/client/requests/new">
-          <Button size="lg" className="rounded-full shadow-soft">Start New Request</Button>
+        <Link href="/client/requests">
+          <Button size="lg" className="rounded-full shadow-soft h-12 px-8">Start New Request</Button>
         </Link>
       </div>
       
