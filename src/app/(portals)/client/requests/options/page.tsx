@@ -24,7 +24,7 @@ export default function OptionsPage() {
         {/* Two Options Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Option 1: Brain Storm Together */}
-          <Link href="/client/requests/new">
+          <Link href="/client/requests/options/ai_chat">
             <div className="group cursor-pointer h-full">
               <div className="bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 p-12 h-full flex flex-col items-center justify-center min-h-[400px] hover:scale-105">
                 <div className="mb-6 p-4 bg-blue-100 rounded-full group-hover:bg-blue-200 transition-colors">
