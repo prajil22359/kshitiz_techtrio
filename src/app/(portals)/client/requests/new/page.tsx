@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Bot, User, Sparkles, CheckCircle2, Send } from "lucide-react";
+import Link from "next/link";
+import { Bot, User, Sparkles, CheckCircle2, Send, ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,23 +11,28 @@ type Message = {
   id: number;
   role: "user" | "assistant";
   content: string;
+  items?: Array<{
+    name: string;
+    category: string;
+    quantity: string;
+  }>;
 };
 
 const demoPrompt = "I need to set up a new premium 20-seat cafe in our Mumbai office branch. We need everything from a commercial espresso machine down to tables and ambient lighting. It needs to look high-end, similar to a Blue Tokai. We need this within 14 days.";
 const demoResponse = "api implementation remaining only a test output";
+const demoItems = [
+  { name: "Commercial Espresso Machine", category: "Appliances", quantity: "x1" },
+  { name: "Premium Wooden Cafe Tables (Small)", category: "Furniture", quantity: "x10" },
+  { name: "Upholstered Premium Chairs", category: "Furniture", quantity: "x20" },
+  { name: "Commercial Coffee Grinder", category: "Appliances", quantity: "x2" },
+];
 
 export default function NewRequest() {
   const [draft, setDraft] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
 
-  const previewTitle = useMemo(() => {
-    return messages.length > 0 ? "Live Request Preview" : "Start a request";
-  }, [messages.length]);
-
   const sendDemoMessage = () => {
     const userMessage = draft.trim() || demoPrompt;
-
-    {/* TODO: Implement API call to send message */}
 
     setMessages((currentMessages) => [
       ...currentMessages,
@@ -39,6 +45,7 @@ export default function NewRequest() {
         id: Date.now() + 1,
         role: "assistant",
         content: demoResponse,
+        items: demoItems,
       },
     ]);
 
@@ -50,6 +57,14 @@ export default function NewRequest() {
       <div className="shrink-0 border-b border-border pb-6">
         <div className="flex items-start justify-between gap-4">
           <div>
+            <Link
+              href="/client/requests"
+              className="mb-4 inline-flex items-center gap-2 rounded-full border border-border bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground transition-colors hover:bg-[#F3F3F3] hover:text-[#1A1A1A]"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Back
+            </Link>
+            
             <h2 className="flex items-center gap-2 text-2xl font-bold text-[#1A1A1A]">
               <Sparkles className="h-6 w-6 text-primary" />
               AI Concierge
@@ -58,9 +73,6 @@ export default function NewRequest() {
               Describe what you need, then press send to generate a clean demo preview.
             </p>
           </div>
-          <Badge variant="outline" className="h-fit rounded-full px-3 py-1 text-[11px] uppercase tracking-wider">
-            {previewTitle}
-          </Badge>
         </div>
       </div>
 
@@ -107,9 +119,45 @@ export default function NewRequest() {
                 >
                   {message.content}
                   {message.role === "assistant" && (
-                    <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-emerald-700">
-                      <CheckCircle2 className="h-3.5 w-3.5" />
-                      Demo output
+                    <div className="mt-4 space-y-4">
+                      <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-emerald-700">
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                        Demo output
+                      </div>
+
+                      <p className="text-sm text-muted-foreground">
+                        Got it! A premium 20-seat cafe setup in Mumbai. I’ve broken down your request into a structured item manifest based on high-end branch standards.
+                      </p>
+
+                      {message.items && (
+                        <div className="overflow-hidden rounded-[24px] border border-border shadow-sm">
+                          <div className="flex items-center justify-between border-b border-border bg-[#FAFAFA] px-5 py-4">
+                            <h4 className="font-semibold text-[#1A1A1A]">Structured Item Manifest</h4>
+                            <Badge variant="outline">Auto-generated</Badge>
+                          </div>
+
+                          <div className="divide-y divide-border">
+                            {message.items.map((item) => (
+                              <div key={item.name} className="flex items-center justify-between px-5 py-4 transition-colors hover:bg-muted/30">
+                                <div>
+                                  <p className="font-medium text-[#1A1A1A]">{item.name}</p>
+                                  <p className="text-sm text-muted-foreground">Category: {item.category}</p>
+                                </div>
+                                <div className="font-semibold text-[#1A1A1A]">{item.quantity}</div>
+                              </div>
+                            ))}
+                          </div>
+
+                          <div className="flex items-center justify-end gap-3 border-t border-border bg-[#FAFAFA] p-4">
+                            <Button variant="ghost" className="text-muted-foreground">
+                              Edit List
+                            </Button>
+                            <Button className="rounded-full shadow-sm pr-4">
+                              Confirm & Send to Triage <CheckCircle2 className="ml-2 h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

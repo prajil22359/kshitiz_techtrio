@@ -29,7 +29,7 @@ export default function RequestsPage() {
             <Filter className="w-4 h-4" /> Filter
           </Button>
         </div>
-        <Link href="/client/requests">
+        <Link href="/client/requests/new">
           <Button size="lg" className="rounded-full shadow-soft h-12 px-8">Start New Request</Button>
         </Link>
       </div>
