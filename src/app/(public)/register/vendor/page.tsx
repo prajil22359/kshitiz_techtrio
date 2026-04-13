@@ -1,13 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Store, ArrowRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useRouter, useSearchParams } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function VendorRegistration() {
   const [step, setStep] = useState(1);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const isOAuthMode = searchParams.get("oauth") === "1";
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -17,17 +24,17 @@ export default function VendorRegistration() {
     fullName: "",
     businessName: "",
     phone: "",
-    altBusiness: ""
+    alternateEmail: "",
   });
 
-  const handleChange = (e: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const goToStep2 = () => {
     setFormData({
       ...formData,
-      fullName: `${formData.firstName} ${formData.lastName}`.trim()
+      fullName: `${formData.firstName} ${formData.lastName}`.trim(),
     });
     setStep(2);
   };
@@ -37,6 +44,202 @@ export default function VendorRegistration() {
 
   const isStep2Valid =
     formData.fullName && formData.businessName && formData.phone;
+
+  const handleContinue = async () => {
+    setLoading(true);
+    setError("");
+
+    const { data: existing, error: existingError } = await supabase
+      .from("users")
+      .select("role")
+      .eq("email", formData.email.toLowerCase())
+      .maybeSingle();
+
+    if (existingError) {
+      setError("Something went wrong. Please try again.");
+      setLoading(false);
+      return;
+    }
+
+    if (existing && existing.role !== "vendor") {
+      setError(
+        `This account already exists as ${existing.role}. Please login using ${existing.role} panel.`
+      );
+      setLoading(false);
+      return;
+    }
+
+    const { data, error } = await supabase.auth.signUp({
+      email: formData.email,
+      password: formData.password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        data: {
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          full_name: formData.fullName,
+          business_name: formData.businessName,
+          phone: formData.phone,
+          alternate_email: formData.alternateEmail,
+          role: "vendor",
+        },
+      },
+    });
+
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+      return;
+    }
+
+    if (data.user) {
+      try {
+        const res = await fetch("/api/admin/upsert-profile", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            id: data.user.id,
+            email: formData.email.toLowerCase(),
+            name: formData.fullName,
+            role: "vendor",
+            company_name: formData.businessName,
+            phone: formData.phone,
+            alternate_email: formData.alternateEmail || null,
+          }),
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          setError(err?.error || "Failed to create profile");
+          setLoading(false);
+          return;
+        }
+
+        alert("Please verify your email before logging in.");
+        router.push("/login");
+
+      } catch (err: any) {
+        setError(err?.message || "Server error");
+        setLoading(false);
+        return;
+      }
+    }
+
+    setLoading(false);
+  };
+useEffect(() => {
+  if (!isOAuthMode) return;
+
+  setStep(2);
+
+  (async () => {
+    const { data } = await supabase.auth.getUser();
+    const user = data?.user;
+
+    if (user) {
+      const meta = user.user_metadata ?? {};
+      setFormData((prev) => ({
+        ...prev,
+        email: user.email ?? prev.email,
+        fullName:
+          meta.full_name ??
+          `${meta.first_name ?? ""} ${meta.last_name ?? ""}`.trim(),
+        businessName: meta.business_name ?? prev.businessName,
+        phone: meta.phone ?? prev.phone,
+      }));
+    }
+  })();
+}, [isOAuthMode]);
+
+const handleOAuthComplete = async () => {
+  setLoading(true);
+  setError("");
+
+  // ✅ STEP 1: Get user FIRST
+  const { data, error: userError } = await supabase.auth.getUser();
+  const user = data?.user;
+
+  if (userError || !user) {
+    setError("User session not found.");
+    setLoading(false);
+    return;
+  }
+
+  // ✅ STEP 2: Check existing role
+  const { data: existing, error: existingError } = await supabase
+    .from("users")
+    .select("role")
+    .eq("email", user.email?.toLowerCase())
+    .maybeSingle();
+
+  if (existingError) {
+    setError("Something went wrong. Please try again.");
+    setLoading(false);
+    return;
+  }
+
+  if (existing && existing.role !== "vendor") {
+    setError(
+      `This account already exists as ${existing.role}. Please login using ${existing.role} panel.`
+    );
+    setLoading(false);
+    return;
+  }
+
+  // ✅ STEP 3: Save profile
+  try {
+    const res = await fetch("/api/admin/upsert-profile", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id: user.id,
+        email: user.email ?? "",
+        name: formData.fullName,
+        role: "vendor",
+        company_name: formData.businessName,
+        phone: formData.phone,
+        alternate_email: formData.alternateEmail || null,
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      setError(err?.error || "Failed to save profile");
+      setLoading(false);
+      return;
+    }
+
+    // ✅ Google users → direct dashboard
+    router.push("/vendor/dashboard");
+    router.refresh();
+
+  } catch (err: any) {
+    setError(err?.message || "Server error");
+  }
+
+  setLoading(false);
+};
+
+  const handleGoogleSignup = async () => {
+    setLoading(true);
+    setError("");
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?flow=signup&role=vendor`,
+      },
+    });
+
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] flex relative overflow-hidden">
@@ -65,7 +268,7 @@ export default function VendorRegistration() {
               {[
                 "Instant access to verified enterprise RFQs",
                 "Automated quoting & intelligent bid matching",
-                "Guaranteed payment protection & fast settlements"
+                "Guaranteed payment protection & fast settlements",
               ].map((b, i) => (
                 <div key={i} className="flex items-center gap-4 font-medium">
                   <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
@@ -105,6 +308,7 @@ export default function VendorRegistration() {
                         placeholder="John"
                         className="h-12 rounded-2xl bg-gray-50/70 border-gray-200 shadow-sm focus-visible:ring-2 focus-visible:ring-primary/30"
                         onChange={handleChange}
+                        value={formData.firstName}
                       />
                     </div>
 
@@ -115,6 +319,7 @@ export default function VendorRegistration() {
                         placeholder="Doe"
                         className="h-12 rounded-2xl bg-gray-50/70 border-gray-200 shadow-sm focus-visible:ring-2 focus-visible:ring-primary/30"
                         onChange={handleChange}
+                        value={formData.lastName}
                       />
                     </div>
                   </div>
@@ -127,6 +332,7 @@ export default function VendorRegistration() {
                       placeholder="john@email.com"
                       className="h-12 rounded-2xl bg-gray-50/70 border-gray-200 shadow-sm focus-visible:ring-2 focus-visible:ring-primary/30"
                       onChange={handleChange}
+                      value={formData.email}
                     />
                   </div>
 
@@ -138,12 +344,19 @@ export default function VendorRegistration() {
                       placeholder="••••••••"
                       className="h-12 rounded-2xl bg-gray-50/70 border-gray-200 shadow-sm focus-visible:ring-2 focus-visible:ring-primary/30"
                       onChange={handleChange}
+                      value={formData.password}
                     />
                   </div>
 
+                  {error ? (
+                    <p className="text-sm font-medium text-red-500">{error}</p>
+                  ) : null}
+
                   <Button
+                    type="button"
                     className="w-full h-12 text-base font-semibold mt-4 shadow-sm group"
                     onClick={goToStep2}
+                    disabled={!isStep1Valid}
                   >
                     Create Vendor Profile
                     <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -158,9 +371,11 @@ export default function VendorRegistration() {
                   </div>
 
                   <Button
+                    type="button"
                     variant="outline"
                     className="w-full h-12 rounded-2xl flex items-center gap-3 border-gray-200 bg-white shadow-sm hover:bg-gray-50 transition-all duration-200"
-                    onClick={goToStep2}
+                    onClick={handleGoogleSignup}
+                    disabled={loading}
                   >
                     <img
                       src="https://www.svgrepo.com/show/475656/google-color.svg"
@@ -203,14 +418,27 @@ export default function VendorRegistration() {
                     placeholder="e.g. John Traders Inc."
                     className="h-12 bg-gray-50/50"
                     onChange={handleChange}
+                    value={formData.businessName}
                   />
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-foreground">Phone Number</label>
                   <div className="flex gap-2">
-                    <Input disabled placeholder="+91" className="h-12 w-20 bg-gray-100 text-center font-medium" />
-                    <Input type="tel" placeholder="98765 43210" className="h-12 flex-1 bg-gray-50/50" required />
+                    <Input
+                      disabled
+                      placeholder="+91"
+                      className="h-12 w-20 bg-gray-100 text-center font-medium"
+                    />
+                    <Input
+                      name="phone"
+                      type="tel"
+                      placeholder="98765 43210"
+                      className="h-12 flex-1 bg-gray-50/50"
+                      required
+                      onChange={handleChange}
+                      value={formData.phone}
+                    />
                   </div>
                 </div>
 
@@ -224,18 +452,26 @@ export default function VendorRegistration() {
                     placeholder="john@business.com (Optional)"
                     className="h-12 bg-gray-50/50"
                     onChange={handleChange}
+                    value={formData.alternateEmail}
                   />
                 </div>
 
+                {error ? (
+                  <p className="text-sm font-medium text-red-500">{error}</p>
+                ) : null}
+
                 <Button
+                  type="button"
                   className="w-full h-12 text-base font-semibold mt-4 shadow-sm group bg-[#A3F43A] hover:bg-[#8FE12F] text-black disabled:opacity-100 disabled:bg-[#A3F43A] disabled:text-black"
-                  disabled={!isStep2Valid}
+                  disabled={!isStep2Valid || loading}
+                  onClick={isOAuthMode ? handleOAuthComplete : handleContinue}
                 >
-                  Continue
+                  {loading ? "Creating..." : "Continue"}
                   <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
 
                 <button
+                  type="button"
                   onClick={() => setStep(1)}
                   className="text-sm text-muted-foreground w-full"
                 >
