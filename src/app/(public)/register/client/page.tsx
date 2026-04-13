@@ -1,15 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Building2, ArrowRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function ClientRegistration() {
   const [step, setStep] = useState(1);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -18,17 +22,18 @@ export default function ClientRegistration() {
     password: "",
     fullName: "",
     companyName: "",
-    phone: ""
+    phone: "",
+    businessName: "",
   });
 
-  const handleChange = (e: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const goToStep2 = () => {
     setFormData({
       ...formData,
-      fullName: `${formData.firstName} ${formData.lastName}`.trim()
+      fullName: `${formData.firstName} ${formData.lastName}`.trim(),
     });
     setStep(2);
   };
@@ -36,12 +41,179 @@ export default function ClientRegistration() {
   const isStep1Valid =
     formData.firstName && formData.lastName && formData.email && formData.password;
 
-  const isStep2Valid = formData.fullName && formData.companyName && formData.phone;
+  const isStep2Valid = formData.fullName && formData.businessName && formData.phone;
 
-  const handleContinue = () => {
-    // For now simulate successful registration and navigate to client dashboard
-    router.push("/client/dashboard");
+  const handleContinue = async () => {
+    setLoading(true);
+    setError("");
+    const { data: existing } = await supabase
+      .from("users")
+      .select("role")
+      .eq("email", formData.email.toLowerCase())
+      .maybeSingle();
+
+    if (existing && existing.role !== "client") {
+      setError(`This account already exists as ${existing.role}. Please login using ${existing.role} panel.`);
+      setLoading(false);
+      return;
+    }
+
+    const { data, error } = await supabase.auth.signUp({
+      email: formData.email,
+      password: formData.password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        data: {
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          full_name: formData.fullName,
+          business_name: formData.businessName,
+          phone: formData.phone,
+          role: "client",
+        },
+      },
+    });
+
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+      return;
+    }
+
+    if (data.session && data.user) {
+      // call server to ensure profile row created
+      try {
+        await fetch("/api/admin/upsert-profile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: data.user.id,
+            email: formData.email,
+            name: formData.fullName,
+            role: "client",
+            company_name: formData.businessName ?? null,
+            phone: formData.phone ?? null,
+            alternate_email: null,
+          }),
+        });
+      } catch (err) {
+        // ignore; user can still proceed
+      }
+
+      alert("Please verify your email before logging in.");
+      router.push("/login");
+    }
+
+    setLoading(false);
   };
+
+  const handleGoogleSignup = async () => {
+    setLoading(true);
+    setError("");
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?role=client&flow=signup`,
+      },
+    });
+
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+    }
+  };
+
+  const handleOAuthComplete = async () => {
+    setLoading(true);
+    setError("");
+
+    const { data, error: userError } = await supabase.auth.getUser();
+    const user = data?.user;
+
+    if (userError || !user) {
+      setError("User session not found.");
+      setLoading(false);
+      return;
+    }
+
+    const { data: existing, error: existingError } = await supabase
+      .from("users")
+      .select("role")
+      .eq("email", user.email?.toLowerCase())
+      .maybeSingle();
+
+    if (existingError) {
+      setError("Something went wrong. Please try again.");
+      setLoading(false);
+      return;
+    }
+
+    if (existing && existing.role !== "client") {
+      setError(`This account already exists as ${existing.role}. Please login using ${existing.role} panel.`);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/admin/upsert-profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: user.id,
+          email: user.email ?? "",
+          name: formData.fullName,
+          role: "client",
+          company_name: formData.businessName,
+          phone: formData.phone,
+          alternate_email: null,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        setError(err?.error || "Failed to save profile");
+        setLoading(false);
+        return;
+      }
+
+      router.push("/client/dashboard");
+      router.refresh();
+    } catch (err: any) {
+      setError(err?.message || "Server error");
+    }
+
+    setLoading(false);
+  };
+
+  // If redirected here from OAuth callback, show step 2 and prefill from user metadata
+  useEffect(() => {
+    const oauth = searchParams?.get("oauth");
+    if (!oauth) return;
+
+    setStep(2);
+
+    (async () => {
+      try {
+        const { data, error } = await supabase.auth.getUser();
+        const user = data?.user;
+        if (user) {
+          const meta = user.user_metadata ?? {};
+          setFormData((prev) => ({
+            ...prev,
+            email: user.email ?? prev.email,
+            fullName: meta.full_name
+              ? meta.full_name
+              : (`${meta.first_name || ""} ${meta.last_name || ""}`.trim() || prev.fullName),
+            businessName: meta.business_name ?? prev.businessName,
+            phone: meta.phone ?? prev.phone,
+          }));
+        }
+      } catch (err) {
+        // ignore
+      }
+    })();
+  }, [searchParams]);
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] flex relative overflow-hidden">
@@ -70,7 +242,7 @@ export default function ClientRegistration() {
               {[
                 "Post requirements and get curated supplier bids",
                 "Smart matching & assisted sourcing",
-                "Payment protection and reliable fulfilment"
+                "Payment protection and reliable fulfilment",
               ].map((b, i) => (
                 <div key={i} className="flex items-center gap-4 font-medium">
                   <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
@@ -83,7 +255,9 @@ export default function ClientRegistration() {
           </div>
         </div>
 
-        <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} All Product God Corp.</p>
+        <p className="text-sm text-muted-foreground">
+          © {new Date().getFullYear()} All Product God Corp.
+        </p>
       </div>
 
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 z-10">
@@ -108,6 +282,7 @@ export default function ClientRegistration() {
                         placeholder="John"
                         className="h-12 rounded-2xl bg-gray-50/70 border-gray-200 shadow-sm focus-visible:ring-2 focus-visible:ring-primary/30"
                         onChange={handleChange}
+                        value={formData.firstName}
                       />
                     </div>
 
@@ -118,6 +293,7 @@ export default function ClientRegistration() {
                         placeholder="Doe"
                         className="h-12 rounded-2xl bg-gray-50/70 border-gray-200 shadow-sm focus-visible:ring-2 focus-visible:ring-primary/30"
                         onChange={handleChange}
+                        value={formData.lastName}
                       />
                     </div>
                   </div>
@@ -130,6 +306,7 @@ export default function ClientRegistration() {
                       placeholder="john@email.com"
                       className="h-12 rounded-2xl bg-gray-50/70 border-gray-200 shadow-sm focus-visible:ring-2 focus-visible:ring-primary/30"
                       onChange={handleChange}
+                      value={formData.email}
                     />
                   </div>
 
@@ -141,13 +318,19 @@ export default function ClientRegistration() {
                       placeholder="••••••••"
                       className="h-12 rounded-2xl bg-gray-50/70 border-gray-200 shadow-sm focus-visible:ring-2 focus-visible:ring-primary/30"
                       onChange={handleChange}
+                      value={formData.password}
                     />
                   </div>
+
+                  {error ? (
+                    <p className="text-sm font-medium text-red-500">{error}</p>
+                  ) : null}
 
                   <Button
                     className="w-full h-12 text-base font-semibold mt-4 shadow-sm group bg-[#A3F43A] hover:bg-[#8FE12F] text-black disabled:opacity-100 disabled:bg-[#A3F43A] disabled:text-black"
                     onClick={goToStep2}
                     disabled={!isStep1Valid}
+                    type="button"
                   >
                     Create Client Profile
                     <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -160,9 +343,11 @@ export default function ClientRegistration() {
                   </div>
 
                   <Button
+                    type="button"
                     variant="outline"
                     className="w-full h-12 rounded-2xl flex items-center gap-3 border-gray-200 bg-white shadow-sm hover:bg-gray-50 transition-all duration-200"
-                    onClick={goToStep2}
+                    onClick={handleGoogleSignup}
+                    disabled={loading}
                   >
                     <img
                       src="https://www.svgrepo.com/show/475656/google-color.svg"
@@ -173,7 +358,7 @@ export default function ClientRegistration() {
                   </Button>
 
                   <p className="pt-2 text-sm text-center text-muted-foreground">
-                    Already registered?{' '}
+                    Already registered?{" "}
                     <Link href="/login" className="font-semibold text-[#1A1A1A] hover:underline">
                       Sign in
                     </Link>
@@ -199,12 +384,13 @@ export default function ClientRegistration() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-[#1A1A1A]">Bussiness Name</label>
+                  <label className="block text-sm font-semibold text-[#1A1A1A]">Business Name</label>
                   <Input
-                    name="Business Name"
+                    name="businessName"
                     placeholder="e.g. Acme Corp."
                     className="h-12 bg-gray-50/50"
                     onChange={handleChange}
+                    value={formData.businessName}
                   />
                 </div>
 
@@ -212,20 +398,38 @@ export default function ClientRegistration() {
                   <label className="text-sm font-semibold text-foreground">Phone Number</label>
                   <div className="flex gap-2">
                     <Input disabled placeholder="+91" className="h-12 w-20 bg-gray-100 text-center font-medium" />
-                    <Input name="phone" type="tel" placeholder="98765 43210" className="h-12 flex-1 bg-gray-50/50" onChange={handleChange} />
+                    <Input
+                      name="phone"
+                      type="tel"
+                      placeholder="98765 43210"
+                      className="h-12 flex-1 bg-gray-50/50"
+                      onChange={handleChange}
+                      value={formData.phone}
+                    />
                   </div>
                 </div>
 
+                {error ? (
+                  <p className="text-sm font-medium text-red-500">{error}</p>
+                ) : null}
+
                 <Button
                   className="w-full h-12 text-base font-semibold mt-4 shadow-sm group bg-[#A3F43A] hover:bg-[#8FE12F] text-black disabled:opacity-100 disabled:bg-[#A3F43A] disabled:text-black"
-                  disabled={!isStep2Valid}
-                  onClick={handleContinue}
+                  disabled={!isStep2Valid || loading}
+                  onClick={searchParams.get("oauth") === "1" ? handleOAuthComplete : handleContinue}
+                  type="button"
                 >
-                  Continue
+                  {loading ? "Creating..." : "Continue"}
                   <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
 
-                <button onClick={() => setStep(1)} className="text-sm text-muted-foreground w-full">← Back</button>
+                <button
+                  type="button"
+                  onClick={() => setStep(1)}
+                  className="text-sm text-muted-foreground w-full"
+                >
+                  ← Back
+                </button>
               </div>
             </div>
           </div>
