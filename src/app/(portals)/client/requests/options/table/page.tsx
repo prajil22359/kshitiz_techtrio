@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Plus, ArrowLeft, Check, Trash2, Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,19 +13,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-
-type TableItem = {
-  id: string;
-  name: string;
-  quantity: number;
-  quality: string;
-  priceRangeMin: number;
-  priceRangeMax: number;
-  comment: string;
-};
+import {
+  createRequestDraft,
+  saveRequestDraft,
+  type RequestItem,
+} from "@/lib/request-flow";
 
 export default function TablePage() {
-  const [items, setItems] = useState<TableItem[]>([]);
+  const router = useRouter();
+  const [items, setItems] = useState<RequestItem[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -36,7 +33,7 @@ export default function TablePage() {
   });
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleOpenForm = (item?: TableItem) => {
+  const handleOpenForm = (item?: RequestItem) => {
     if (item) {
       setEditingId(item.id);
       setFormData({
@@ -112,7 +109,7 @@ export default function TablePage() {
         )
       );
     } else {
-      const newItem: TableItem = {
+      const newItem: RequestItem = {
         id: Date.now().toString(),
         name: formData.name,
         quantity,
@@ -145,8 +142,9 @@ export default function TablePage() {
       alert("Please add at least one item");
       return;
     }
-    console.log("Submitted items:", items);
-    // TODO: Submit to API
+
+    saveRequestDraft(createRequestDraft(items));
+    router.push("/client/requests/timeline");
   };
 
   return (
