@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { PackageSearch, LayoutDashboard, ShoppingCart, CreditCard, Settings, FileText } from "lucide-react";
 
+
 export default function ClientPortalLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const titleByRoute = [
