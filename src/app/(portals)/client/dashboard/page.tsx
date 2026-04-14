@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 
 export default function ClientDashboard() {
   return (
@@ -10,7 +11,11 @@ export default function ClientDashboard() {
           <h2 className="text-2xl font-bold text-[#1A1A1A]">Need something new?</h2>
           <p className="text-muted-foreground mt-1">Talk to our AI Concierge to instantly scope your next procurement request.</p>
         </div>
-        <Button size="lg" className="rounded-full">Start New Requirement</Button>
+        <Button size="lg" className="rounded-full">
+          <Link href="/client/requests/options">
+            Start New Requirement
+          </Link>
+        </Button>
       </div>
 
       {/* Grid of active requests */}
