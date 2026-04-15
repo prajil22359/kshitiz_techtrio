@@ -1,17 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { Building2, ArrowRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 
-export default function ClientRegistration() {
+function ClientRegistrationContent() {
   const [step, setStep] = useState(1);
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const [isOAuthMode, setIsOAuthMode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -188,7 +188,9 @@ export default function ClientRegistration() {
 
   // If redirected here from OAuth callback, show step 2 and prefill from user metadata
   useEffect(() => {
-    const oauth = searchParams?.get("oauth");
+    const oauth = new URLSearchParams(window.location.search).get("oauth");
+    setIsOAuthMode(oauth === "1");
+
     if (!oauth) return;
 
     setStep(2);
@@ -213,7 +215,7 @@ export default function ClientRegistration() {
         // ignore
       }
     })();
-  }, [searchParams]);
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] flex relative overflow-hidden">
@@ -416,7 +418,7 @@ export default function ClientRegistration() {
                 <Button
                   className="w-full h-12 text-base font-semibold mt-4 shadow-sm group bg-[#A3F43A] hover:bg-[#8FE12F] text-black disabled:opacity-100 disabled:bg-[#A3F43A] disabled:text-black"
                   disabled={!isStep2Valid || loading}
-                  onClick={searchParams.get("oauth") === "1" ? handleOAuthComplete : handleContinue}
+                  onClick={isOAuthMode ? handleOAuthComplete : handleContinue}
                   type="button"
                 >
                   {loading ? "Creating..." : "Continue"}
@@ -436,5 +438,12 @@ export default function ClientRegistration() {
         </div>
       </div>
     </div>
+  );
+}
+export default function ClientRegistration() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+      <ClientRegistrationContent />
+    </Suspense>
   );
 }

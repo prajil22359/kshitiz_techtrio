@@ -1,18 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { Store, ArrowRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 
-export default function VendorRegistration() {
+function VendorRegistrationContent() {
   const [step, setStep] = useState(1);
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const isOAuthMode = searchParams.get("oauth") === "1";
+  const [isOAuthMode, setIsOAuthMode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -129,6 +128,12 @@ export default function VendorRegistration() {
 
     setLoading(false);
   };
+
+useEffect(() => {
+  const oauth = new URLSearchParams(window.location.search).get("oauth");
+  setIsOAuthMode(oauth === "1");
+}, []);
+
 useEffect(() => {
   if (!isOAuthMode) return;
 
@@ -483,5 +488,13 @@ const handleOAuthComplete = async () => {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function VendorRegistration() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+      <VendorRegistrationContent />
+    </Suspense>
   );
 }

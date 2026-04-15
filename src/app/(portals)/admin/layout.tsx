@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LayoutDashboard, FileText, FileSpreadsheet, Package, Truck, Users, FileEdit, ShieldAlert } from "lucide-react";
+import { LayoutDashboard, FileText, FileSpreadsheet, Package, Truck, Users, FileEdit, ShieldAlert, CreditCard } from "lucide-react";
 
 export default function AdminPortalLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -29,6 +29,9 @@ export default function AdminPortalLayout({ children }: { children: React.ReactN
           </Link>
           <Link href="/admin/shipments" className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-[#1A1A1A] hover:bg-black/5 rounded-lg">
              <Truck className="w-4 h-4" /> Shiprocket Sync
+          </Link>
+          <Link href="/admin/payments" className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-[#1A1A1A] hover:bg-black/5 rounded-lg">
+             <CreditCard className="w-4 h-4" /> Payments
           </Link>
           <div className="pt-4 pb-2 px-3 text-xs font-bold text-muted-foreground uppercase tracking-widest">Ecosystem</div>
           <Link href="/admin/vendors" className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-[#1A1A1A] hover:bg-black/5 rounded-lg">
