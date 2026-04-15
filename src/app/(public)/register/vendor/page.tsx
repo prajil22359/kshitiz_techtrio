@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { Store, ArrowRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 
-export default function VendorRegistration() {
+function VendorRegistrationContent() {
   const [step, setStep] = useState(1);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -483,5 +483,13 @@ const handleOAuthComplete = async () => {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function VendorRegistration() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+      <VendorRegistrationContent />
+    </Suspense>
   );
 }

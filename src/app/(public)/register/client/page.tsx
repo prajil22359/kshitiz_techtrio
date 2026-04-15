@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { Building2, ArrowRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 
-export default function ClientRegistration() {
+function ClientRegistrationContent() {
   const [step, setStep] = useState(1);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -436,5 +436,12 @@ export default function ClientRegistration() {
         </div>
       </div>
     </div>
+  );
+}
+export default function ClientRegistration() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+      <ClientRegistrationContent />
+    </Suspense>
   );
 }
