@@ -69,21 +69,140 @@ const CATALOG_ITEMS = [
 
 export default function CatalogHub() {
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState<"all" | "active" | "attention">("all");
 
-  const toggleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelectedItems(new Set(CATALOG_ITEMS.map(i => i.id)));
-    } else {
-      setSelectedItems(new Set());
-    }
+  const tabItems = CATALOG_ITEMS.filter((item) => {
+    if (activeTab === "active") return item.status === "Active";
+    if (activeTab === "attention") return item.status === "Needs Attention";
+    return true;
+  });
+
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const visibleItems = tabItems.filter((item) => {
+    if (!normalizedQuery) return true;
+    return [item.id, item.name, item.category, item.zones].some((field) =>
+      field.toLowerCase().includes(normalizedQuery)
+    );
+  });
+
+  const allVisibleSelected =
+    visibleItems.length > 0 && visibleItems.every((item) => selectedItems.has(item.id));
+
+  const toggleSelectAll = (checked: boolean | "indeterminate") => {
+    setSelectedItems((prev) => {
+      const next = new Set(prev);
+
+      if (checked === true) {
+        visibleItems.forEach((item) => next.add(item.id));
+      } else {
+        visibleItems.forEach((item) => next.delete(item.id));
+      }
+
+      return next;
+    });
   };
 
   const toggleItem = (id: string) => {
-    const newSet = new Set(selectedItems);
-    if (newSet.has(id)) newSet.delete(id);
-    else newSet.add(id);
-    setSelectedItems(newSet);
+    setSelectedItems((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   };
+
+  const renderCatalogTable = () => (
+    <Table>
+      <TableHeader className="bg-gray-50/80 sticky top-0 z-10 hidden sm:table-header-group border-b">
+        <TableRow className="hover:bg-transparent">
+          <TableHead className="w-[50px] px-4">
+            <Checkbox
+              checked={allVisibleSelected}
+              onCheckedChange={toggleSelectAll}
+              aria-label="Select all"
+            />
+          </TableHead>
+          <TableHead className="w-[80px] text-xs font-semibold uppercase tracking-wider text-muted-foreground">ID</TableHead>
+          <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Product Details</TableHead>
+          <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground text-right">Price/Unit</TableHead>
+          <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Inventory & ETA</TableHead>
+          <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</TableHead>
+          <TableHead className="w-[60px]"></TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {visibleItems.length === 0 && (
+          <TableRow>
+            <TableCell colSpan={7} className="py-12 text-center text-sm text-muted-foreground">
+              No products matched your search.
+            </TableCell>
+          </TableRow>
+        )}
+        {visibleItems.map((item) => (
+          <TableRow
+            key={item.id}
+            className={`hover:bg-gray-50/50 transition-colors group ${selectedItems.has(item.id) ? "bg-primary/5" : ""}`}
+            data-state={selectedItems.has(item.id) && "selected"}
+          >
+            <TableCell className="px-4">
+              <Checkbox
+                checked={selectedItems.has(item.id)}
+                onCheckedChange={() => toggleItem(item.id)}
+                aria-label={`Select ${item.name}`}
+              />
+            </TableCell>
+            <TableCell className="font-mono text-xs text-muted-foreground/70">{item.id}</TableCell>
+            <TableCell>
+              <div className="flex items-center gap-4 w-max">
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-sm ${item.imgColor}`}>
+                  {item.name.substring(0, 2).toUpperCase()}
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors cursor-pointer">{item.name}</span>
+                  <span className="text-xs text-muted-foreground">{item.category} • {item.zones}</span>
+                </div>
+              </div>
+            </TableCell>
+            <TableCell className="font-semibold text-sm text-right">{item.price}</TableCell>
+            <TableCell>
+              <div className="flex flex-col w-max">
+                <span className={`text-sm font-semibold flex items-center gap-1.5 ${item.stock === 0 ? "text-red-600" : "text-emerald-600"}`}>
+                  {item.stock === 0 ? <AlertCircle className="w-3.5 h-3.5" /> : <Check className="w-3.5 h-3.5" />}
+                  {item.stock === 0 ? "Out of Stock" : `${item.stock} in stock`}
+                </span>
+                <span className="text-xs text-muted-foreground">Ships in {item.eta}</span>
+              </div>
+            </TableCell>
+            <TableCell>
+              {item.status === "Active" && <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200">Active</Badge>}
+              {item.status === "Needs Attention" && <Badge className="bg-red-50 text-red-700 border-red-200">Needs Attention</Badge>}
+              {item.status === "Draft" && <Badge variant="outline" className="text-gray-500 bg-gray-50">Draft</Badge>}
+            </TableCell>
+            <TableCell>
+              <DropdownMenu>
+                <DropdownMenuTrigger render={<Button variant="ghost" className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100 data-[state=open]:opacity-100" />}>
+                  <MoreVertical className="h-4 w-4 text-muted-foreground" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-40 border-gray-100 shadow-xl">
+                  <DropdownMenuItem className="gap-2 cursor-pointer font-medium text-sm">
+                    <Edit2 className="w-4 h-4 text-muted-foreground" /> Edit item
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="gap-2 cursor-pointer font-medium text-sm">
+                    <Box className="w-4 h-4 text-muted-foreground" /> Duplicate
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="gap-2 cursor-pointer font-medium text-sm text-red-600 focus:text-red-700 focus:bg-red-50">
+                    <Trash2 className="w-4 h-4" /> Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
@@ -133,7 +252,7 @@ export default function CatalogHub() {
       {/* Main Catalog View */}
       <Card className="border border-border bg-white shadow-sm overflow-hidden">
         
-        <Tabs defaultValue="all" className="w-full">
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "all" | "active" | "attention")} className="w-full">
           {/* Header Action Bar */}
           <div className="p-4 border-b border-border flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between bg-white">
             
@@ -148,12 +267,17 @@ export default function CatalogHub() {
             <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto justify-end">
               <div className="relative w-full sm:w-64">
                 <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <Input placeholder="Search products..." className="pl-9 bg-gray-50/50 focus-visible:bg-white h-10 border-gray-200" />
+                <Input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search by name, ID, category, zone..."
+                  className="pl-9 bg-gray-50/50 focus-visible:bg-white h-10 border-gray-200"
+                />
               </div>
 
               {/* Bulk Import Dialog */}
               <Dialog>
-                <DialogTrigger render={<Button variant="outline" className="h-10 gap-2 border-gray-200 hover:bg-gray-50" />}>
+                <DialogTrigger render={<Button variant="outline" className="cursor-pointer h-10 gap-2 border-gray-200 hover:bg-gray-50" />}>
                   <Upload className="w-4 h-4" />
                   <span className="hidden sm:inline">Bulk Import</span>
                 </DialogTrigger>
@@ -190,7 +314,7 @@ export default function CatalogHub() {
 
               {/* Add Product Sliding Panel */}
               <Sheet>
-                <SheetTrigger render={<Button className="h-10 gap-2 shadow-sm" />}>
+                <SheetTrigger render={<Button className="cursor-pointer h-10 gap-2 shadow-sm" />}>
                   <Plus className="w-4 h-4" />
                   <span className="hidden sm:inline">Add Product</span>
                 </SheetTrigger>
@@ -276,101 +400,21 @@ export default function CatalogHub() {
           {/* Data Table */}
           <div className="overflow-x-auto min-h-[400px]">
             <TabsContent value="all" className="m-0 border-none p-0 outline-none">
-              <Table>
-                <TableHeader className="bg-gray-50/80 sticky top-0 z-10 hidden sm:table-header-group border-b">
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead className="w-[50px] px-4">
-                      <Checkbox 
-                        checked={selectedItems.size === CATALOG_ITEMS.length && CATALOG_ITEMS.length > 0}
-                        onCheckedChange={toggleSelectAll}
-                        aria-label="Select all"
-                      />
-                    </TableHead>
-                    <TableHead className="w-[80px] text-xs font-semibold uppercase tracking-wider text-muted-foreground">ID</TableHead>
-                    <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Product Details</TableHead>
-                    <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground text-right">Price/Unit</TableHead>
-                    <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Inventory & ETA</TableHead>
-                    <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</TableHead>
-                    <TableHead className="w-[60px]"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {CATALOG_ITEMS.map((item) => (
-                    <TableRow 
-                      key={item.id} 
-                      className={`hover:bg-gray-50/50 transition-colors group ${selectedItems.has(item.id) ? 'bg-primary/5' : ''}`}
-                      data-state={selectedItems.has(item.id) && "selected"}
-                    >
-                      <TableCell className="px-4">
-                        <Checkbox 
-                          checked={selectedItems.has(item.id)}
-                          onCheckedChange={() => toggleItem(item.id)}
-                          aria-label={`Select ${item.name}`}
-                        />
-                      </TableCell>
-                      <TableCell className="font-mono text-xs text-muted-foreground/70">{item.id}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-4 w-max">
-                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-sm ${item.imgColor}`}>
-                            {item.name.substring(0,2).toUpperCase()}
-                          </div>
-                          <div className="flex flex-col">
-                            <span className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors cursor-pointer">{item.name}</span>
-                            <span className="text-xs text-muted-foreground">{item.category} • {item.zones}</span>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-semibold text-sm text-right">{item.price}</TableCell>
-                      <TableCell>
-                        <div className="flex flex-col w-max">
-                          <span className={`text-sm font-semibold flex items-center gap-1.5 ${item.stock === 0 ? 'text-red-600' : 'text-emerald-600'}`}>
-                            {item.stock === 0 ? <AlertCircle className="w-3.5 h-3.5" /> : <Check className="w-3.5 h-3.5" />}
-                            {item.stock === 0 ? 'Out of Stock' : `${item.stock} in stock`}
-                          </span>
-                          <span className="text-xs text-muted-foreground">Ships in {item.eta}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {item.status === 'Active' && <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200">Active</Badge>}
-                        {item.status === 'Needs Attention' && <Badge className="bg-red-50 text-red-700 border-red-200">Needs Attention</Badge>}
-                        {item.status === 'Draft' && <Badge variant="outline" className="text-gray-500 bg-gray-50">Draft</Badge>}
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger render={<Button variant="ghost" className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100 data-[state=open]:opacity-100" />}>
-                            <MoreVertical className="h-4 w-4 text-muted-foreground" />
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-40 border-gray-100 shadow-xl rounded-xl">
-                            <DropdownMenuItem className="gap-2 cursor-pointer font-medium text-sm">
-                              <Edit2 className="w-4 h-4 text-muted-foreground" /> Edit item
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="gap-2 cursor-pointer font-medium text-sm">
-                              <Box className="w-4 h-4 text-muted-foreground" /> Duplicate
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem className="gap-2 cursor-pointer font-medium text-sm text-red-600 focus:text-red-700 focus:bg-red-50">
-                              <Trash2 className="w-4 h-4" /> Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              {renderCatalogTable()}
             </TabsContent>
-            {/* Empty States for other tabs could go here */}
-            <TabsContent value="active" className="p-8 text-center text-muted-foreground">
-              Filtered to Active Products (Dummy view)
+            <TabsContent value="active" className="m-0 border-none p-0 outline-none">
+              {renderCatalogTable()}
             </TabsContent>
-            <TabsContent value="attention" className="p-8 text-center text-muted-foreground">
-              Filtered to Items needing attention (Dummy view)
+            <TabsContent value="attention" className="m-0 border-none p-0 outline-none">
+              {renderCatalogTable()}
             </TabsContent>
           </div>
           
           {/* Pagination */}
           <div className="p-4 border-t border-border flex items-center justify-between bg-gray-50/30">
-            <p className="text-sm text-muted-foreground font-medium">Showing 1 to 6 of 142 items</p>
+            <p className="text-sm text-muted-foreground font-medium">
+              Showing {visibleItems.length} of {tabItems.length} items
+            </p>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" disabled className="border-gray-200">Previous</Button>
               <Button variant="outline" size="sm" className="border-gray-200 bg-white">Next</Button>
