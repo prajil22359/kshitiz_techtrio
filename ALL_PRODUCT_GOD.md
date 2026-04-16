@@ -111,13 +111,6 @@ The Admin portal is optimizing for speed, vendor comparison, and margin control.
 - `/vendor/onboarding` (Wizard for unapproved users)
 - `/vendor/dashboard` (Inbox, Pending Quotes, Active Orders)
 - `/vendor/catalog` (Excel upload & manual edits)
-
-**Admin Portal:**
-- `/admin/dashboard` (Global operational metrics)
-- `/admin/requests/triage` (The AI list review -> RFQ dispatch screen)
-- `/admin/quotations/compare` (The Accordion Tiering UI)
-- `/admin/vendors/approvals` (Gatekeeper queue)
-
 ---
 
 ## 5. Development Phasing
