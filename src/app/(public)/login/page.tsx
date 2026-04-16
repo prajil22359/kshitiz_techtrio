@@ -247,16 +247,6 @@ export default function Login() {
             </div>
           </div>
         </div>
-
-        <p className="mt-10 text-center gap-2 text-sm text-muted-foreground font-medium flex justify-center items-center">
-          Internal operations team?{" "}
-          <Link
-            href="/admin/dashboard"
-            className="font-semibold leading-6 text-[#1A1A1A] hover:text-primary transition-colors"
-          >
-            Admin Sign In →
-          </Link>
-        </p>
       </div>
     </div>
   );
