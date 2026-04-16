@@ -1,0 +1,4 @@
+id,name,category,price,stock,zones,eta,status
+PRD-100,HP EliteBook 840,Laptops,78000,20,Delhi NCR,2 Days,Active
+PRD-101,Samsung 27 Curved Monitor,Monitors,24000,8,Pan India,4 Days,Draft
+PRD-102,Logitech K380 Keyboard,Accessories,3200,0,Bangalore,1 Day,Needs Attention

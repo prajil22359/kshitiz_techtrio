@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { 
   Search, 
   Plus, 
@@ -56,23 +56,23 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-
-// Dummy Data
-const CATALOG_ITEMS = [
-  { id: "PRD-001", name: "Dell Latitude 7420", category: "Laptops", price: "₹85,000", stock: 45, zones: "Delhi NCR", eta: "2 Days", status: "Active", imgColor: "bg-blue-100 text-blue-600" },
-  { id: "PRD-002", name: "Lenovo ThinkPad X1", category: "Laptops", price: "₹1,12,000", stock: 12, zones: "Pan India", eta: "5 Days", status: "Active", imgColor: "bg-red-100 text-red-600" },
-  { id: "PRD-003", name: "Logitech MX Master 3S", category: "Accessories", price: "₹8,500", stock: 0, zones: "Delhi NCR", eta: "1 Day", status: "Needs Attention", imgColor: "bg-gray-100 text-gray-600" },
-  { id: "PRD-004", name: "MacBook Pro 16 M3", category: "Laptops", price: "₹2,45,000", stock: 5, zones: "Gurgaon", eta: "2 Days", status: "Active", imgColor: "bg-slate-100 text-slate-800" },
-  { id: "PRD-005", name: "Dell Ultrasharp 27\"", category: "Monitors", price: "₹32,000", stock: 18, zones: "Pan India", eta: "4 Days", status: "Draft", imgColor: "bg-indigo-100 text-indigo-600" },
-  { id: "PRD-006", name: "Anker USB-C Hub", category: "Accessories", price: "₹4,200", stock: 0, zones: "Pan India", eta: "3 Days", status: "Needs Attention", imgColor: "bg-teal-100 text-teal-600" },
-];
+import { parseCatalogUploadFile, upsertCatalogItems } from "@/lib/catalog/catalog-upload";
+import { CatalogItem, SEED_CATALOG_ITEMS } from "@/lib/catalog/catalog-types";
 
 export default function CatalogHub() {
+  const [catalogItems, setCatalogItems] = useState<CatalogItem[]>(SEED_CATALOG_ITEMS);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"all" | "active" | "attention">("all");
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadSummary, setUploadSummary] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const tabItems = CATALOG_ITEMS.filter((item) => {
+  const activeProductsCount = catalogItems.filter((item) => item.status === "Active").length;
+  const attentionCount = catalogItems.filter((item) => item.status === "Needs Attention").length;
+  const uniqueZonesCount = new Set(catalogItems.map((item) => item.zones.toLowerCase())).size;
+
+  const tabItems = catalogItems.filter((item) => {
     if (activeTab === "active") return item.status === "Active";
     if (activeTab === "attention") return item.status === "Needs Attention";
     return true;
@@ -110,6 +110,74 @@ export default function CatalogHub() {
       else next.add(id);
       return next;
     });
+  };
+
+  const handleTemplateDownload = () => {
+    const link = document.createElement("a");
+    link.href = "/templates/vendor-catalog-template.csv";
+    link.download = "vendor-catalog-template.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const processUpload = async (file: File) => {
+    setIsUploading(true);
+    setUploadSummary(null);
+
+    try {
+      const result = await parseCatalogUploadFile(file);
+
+      if (result.missingColumns.length > 0) {
+        const missing = result.missingColumns.join(", ");
+        alert(`Your file is missing required columns: ${missing}. Please update the file and upload again.`);
+        setUploadSummary(`Upload blocked. Missing columns: ${missing}.`);
+        return;
+      }
+
+      if (result.items.length === 0) {
+        alert("No valid rows found. Please fill all required fields in each row.");
+        setUploadSummary("No valid items were imported.");
+        return;
+      }
+
+      setCatalogItems((prev) => upsertCatalogItems(prev, result.items));
+
+      const issueRowPreview = result.issues
+        .slice(0, 4)
+        .map((issue) => `row ${issue.rowNumber}`)
+        .join(", ");
+
+      const summary =
+        result.issues.length > 0
+          ? `Imported ${result.items.length} items. Skipped ${result.skippedRows} row(s) with missing values (${issueRowPreview}${result.issues.length > 4 ? ", ..." : ""}).`
+          : `Imported ${result.items.length} item(s) successfully.`;
+
+      setUploadSummary(summary);
+      alert(summary);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Upload failed.";
+      setUploadSummary(message);
+      alert(message);
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  const onUploadInputChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    await processUpload(file);
+  };
+
+  const onDropUpload = async (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const file = event.dataTransfer.files?.[0];
+    if (!file) return;
+    await processUpload(file);
   };
 
   const renderCatalogTable = () => (
@@ -216,7 +284,7 @@ export default function CatalogHub() {
             </div>
             <div>
               <p className="text-sm font-medium text-muted-foreground">Total Active Products</p>
-              <h3 className="text-3xl font-bold text-foreground tracking-tight">142</h3>
+              <h3 className="text-3xl font-bold text-foreground tracking-tight">{activeProductsCount}</h3>
             </div>
           </CardContent>
         </Card>
@@ -229,7 +297,7 @@ export default function CatalogHub() {
             </div>
             <div>
               <p className="text-sm font-medium text-muted-foreground">Needs Attention</p>
-              <h3 className="text-3xl font-bold text-foreground tracking-tight">2</h3>
+              <h3 className="text-3xl font-bold text-foreground tracking-tight">{attentionCount}</h3>
               <p className="text-sm text-red-600 mt-1 font-medium flex items-center gap-1">Out of stock</p>
             </div>
           </CardContent>
@@ -242,7 +310,7 @@ export default function CatalogHub() {
             </div>
             <div>
               <p className="text-sm font-medium text-muted-foreground">Delivery Zones</p>
-              <h3 className="text-3xl font-bold text-foreground tracking-tight">5</h3>
+              <h3 className="text-3xl font-bold text-foreground tracking-tight">{uniqueZonesCount}</h3>
               <p className="text-sm text-blue-600 mt-1 font-medium">Pan India Coverage</p>
             </div>
           </CardContent>
@@ -285,18 +353,33 @@ export default function CatalogHub() {
                   <DialogHeader>
                     <DialogTitle className="text-xl">Bulk Upload Catalog</DialogTitle>
                     <DialogDescription>
-                      Upload your Excel (.xlsx) file to add or update multiple products.
+                      Upload CSV or Excel (.xlsx) to add or update multiple products.
                     </DialogDescription>
                   </DialogHeader>
-                  <div className="border-2 border-dashed border-primary/20 hover:border-primary/50 transition-colors bg-primary/5 rounded-2xl p-10 flex flex-col items-center justify-center gap-4 mt-2 cursor-pointer group">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".csv,.xlsx,.xls"
+                    className="hidden"
+                    onChange={onUploadInputChange}
+                  />
+                  <div
+                    className="border-2 border-dashed border-primary/20 hover:border-primary/50 transition-colors bg-primary/5 rounded-2xl p-10 flex flex-col items-center justify-center gap-4 mt-2 cursor-pointer group"
+                    onClick={() => fileInputRef.current?.click()}
+                    onDragOver={(event) => event.preventDefault()}
+                    onDrop={onDropUpload}
+                  >
                     <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
                       <Upload className="w-8 h-8 text-primary" />
                     </div>
                     <div className="text-center">
-                      <p className="font-semibold text-lg text-foreground">Click or Drag & Drop</p>
-                      <p className="text-sm text-muted-foreground mt-1">Supports EXCEL, CSV up to 10MB</p>
+                      <p className="font-semibold text-lg text-foreground">{isUploading ? "Uploading..." : "Click or Drag & Drop"}</p>
+                      <p className="text-sm text-muted-foreground mt-1">Supports EXCEL, CSV up to 10MB. Extra columns are ignored.</p>
                     </div>
                   </div>
+                  {uploadSummary && (
+                    <p className="text-xs text-muted-foreground mt-2">{uploadSummary}</p>
+                  )}
                   <div className="mt-2 flex justify-between items-center bg-blue-50/50 p-4 rounded-xl border border-blue-100">
                     <div className="flex items-center gap-3 text-blue-800">
                       <Box className="w-5 h-5"/> 
@@ -305,7 +388,7 @@ export default function CatalogHub() {
                         <p className="text-xs opacity-80">Download our structured template</p>
                       </div>
                     </div>
-                    <Button size="sm" variant="secondary" className="gap-2 bg-white hover:bg-gray-50 text-blue-700 border border-blue-200">
+                    <Button size="sm" variant="secondary" className="gap-2 bg-white hover:bg-gray-50 text-blue-700 border border-blue-200" onClick={handleTemplateDownload}>
                       <Download className="w-4 h-4"/> Template
                     </Button>
                   </div>
