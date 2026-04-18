@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Bot, User, Sparkles, CheckCircle2, Send, ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,8 @@ type Message = {
   }>;
 };
 
-const demoPrompt = "I need to set up a new premium 20-seat cafe in our Mumbai office branch. We need everything from a commercial espresso machine down to tables and ambient lighting. It needs to look high-end, similar to a Blue Tokai. We need this within 14 days.";
+const demoPrompt =
+  "I need to set up a new premium 20-seat cafe in our Mumbai office branch. We need everything from a commercial espresso machine down to tables and ambient lighting. It needs to look high-end, similar to a Blue Tokai. We need this within 14 days.";
 const demoResponse = "api implementation remaining only a test output";
 const demoItems = [
   { name: "Commercial Espresso Machine", category: "Appliances", quantity: "x1" },
@@ -28,6 +30,10 @@ const demoItems = [
 ];
 
 export default function NewRequest() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const requestTitle = searchParams.get("title")?.trim() || "Untitled request";
+
   const [draft, setDraft] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
 
@@ -52,21 +58,29 @@ export default function NewRequest() {
     setDraft("");
   };
 
+  const goToTable = () => {
+    router.push(`/client/requests/options/table?title=${encodeURIComponent(requestTitle)}`);
+  };
+
   return (
     <div className="mx-auto flex h-[calc(100vh-8rem)] max-w-5xl flex-col px-4">
       <div className="shrink-0 border-b border-border pb-6">
-        <Link href="/client/requests/options">
+        <Link href={`/client/requests/options?title=${encodeURIComponent(requestTitle)}`}>
           <button className="flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-8 transition-colors">
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="h-5 w-5" />
             Back to Options
           </button>
         </Link>
+
         <div className="flex items-start justify-between gap-4">
           <div>
             <h2 className="flex items-center gap-2 text-2xl font-bold text-[#1A1A1A]">
               <Sparkles className="h-6 w-6 text-primary" />
               AI Concierge
             </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Request title: <span className="font-medium text-[#1A1A1A]">{requestTitle}</span>
+            </p>
             <p className="mt-1 text-sm text-muted-foreground">
               Describe what you need, then press send to generate a clean demo preview.
             </p>
@@ -124,7 +138,7 @@ export default function NewRequest() {
                       </div>
 
                       <p className="text-sm text-muted-foreground">
-                        Got it! A premium 20-seat cafe setup in Mumbai. I’ve broken down your request into a structured item manifest based on high-end branch standards.
+                        Got it! A premium 20-seat cafe setup in Mumbai. I&apos;ve broken down your request into a structured item manifest based on high-end branch standards.
                       </p>
 
                       {message.items && (
@@ -147,11 +161,12 @@ export default function NewRequest() {
                           </div>
 
                           <div className="flex items-center justify-end gap-3 border-t border-border bg-[#FAFAFA] p-4">
-                            <Button variant="ghost" className="text-muted-foreground">
+                            <Button variant="ghost" className="text-muted-foreground" onClick={goToTable}>
                               Edit List
                             </Button>
-                            <Button className="rounded-full shadow-sm pr-4">
-                              Confirm & Send to Triage <CheckCircle2 className="ml-2 h-4 w-4" />
+                            <Button className="rounded-full shadow-sm pr-4" onClick={goToTable}>
+                              Confirm &amp; Continue
+                              <CheckCircle2 className="ml-2 h-4 w-4" />
                             </Button>
                           </div>
                         </div>
