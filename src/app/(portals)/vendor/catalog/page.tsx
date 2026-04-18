@@ -14,7 +14,8 @@ import {
   Download,
   Image as ImageIcon,
   Check,
-  ChevronDown
+  ChevronDown,
+  ArrowUpDown
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -58,12 +59,15 @@ import {
 } from "@/components/ui/dialog";
 import { parseCatalogUploadFile, upsertCatalogItems } from "@/lib/catalog/catalog-upload";
 import { CatalogItem, SEED_CATALOG_ITEMS } from "@/lib/catalog/catalog-types";
+import { CatalogSortField, sortCatalogItems } from "@/lib/catalog/catalog-sort";
 
 export default function CatalogHub() {
   const [catalogItems, setCatalogItems] = useState<CatalogItem[]>(SEED_CATALOG_ITEMS);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"all" | "active" | "attention">("all");
+  const [sortField, setSortField] = useState<CatalogSortField>("name");
+  const [isAscending, setIsAscending] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSummary, setUploadSummary] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -79,11 +83,16 @@ export default function CatalogHub() {
   });
 
   const normalizedQuery = searchQuery.trim().toLowerCase();
-  const visibleItems = tabItems.filter((item) => {
+  const filteredItems = tabItems.filter((item) => {
     if (!normalizedQuery) return true;
     return [item.id, item.name, item.category, item.zones].some((field) =>
       field.toLowerCase().includes(normalizedQuery)
     );
+  });
+
+  const visibleItems = sortCatalogItems(filteredItems, {
+    field: sortField,
+    direction: isAscending ? "asc" : "desc",
   });
 
   const allVisibleSelected =
@@ -276,7 +285,7 @@ export default function CatalogHub() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
       
       {/* Overview Cards with Premium Gradients */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="border-none shadow-sm bg-gradient-to-br from-white to-gray-50 border border-gray-100 hover:shadow-md transition-shadow">
           <CardContent className="p-6 flex items-center gap-4">
             <div className="p-4 bg-primary/10 text-primary rounded-2xl shadow-sm">
@@ -322,18 +331,18 @@ export default function CatalogHub() {
         
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "all" | "active" | "attention")} className="w-full">
           {/* Header Action Bar */}
-          <div className="p-4 border-b border-border flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between bg-white">
+          <div className="p-4 border-b border-border flex flex-col xl:flex-row gap-3 items-start xl:items-center justify-between bg-white">
             
-            <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
-              <TabsList className="bg-gray-100/80 p-1 h-10">
+            <div className="flex w-full xl:w-auto items-center">
+              <TabsList className="bg-gray-100/80 p-1 h-10 w-full sm:w-auto">
                 <TabsTrigger value="all" className="rounded-md px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm">All Products</TabsTrigger>
                 <TabsTrigger value="active" className="rounded-md px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm">Active</TabsTrigger>
                 <TabsTrigger value="attention" className="rounded-md px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm text-red-600 data-[state=active]:text-red-700">Needs Attention</TabsTrigger>
               </TabsList>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto justify-end">
-              <div className="relative w-full sm:w-64">
+            <div className="grid w-full xl:w-auto grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto_auto_auto_auto] gap-2 sm:items-center xl:min-w-[880px]">
+              <div className="relative w-full">
                 <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   value={searchQuery}
@@ -343,9 +352,32 @@ export default function CatalogHub() {
                 />
               </div>
 
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  render={<Button variant="outline" className="h-10 w-full sm:w-[170px] justify-between border-gray-200" />}
+                >
+                  <span>Sort: {sortField === "quantity" ? "Quantity" : sortField === "price" ? "Price" : "Name"}</span>
+                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-[170px]">
+                  <DropdownMenuItem onClick={() => setSortField("name")}>Name</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortField("quantity")}>Quantity</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortField("price")}>Price</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <Button
+                variant="outline"
+                className="h-10 w-full sm:w-[140px] gap-2 border-gray-200"
+                onClick={() => setIsAscending((current) => !current)}
+              >
+                <ArrowUpDown className="w-4 h-4" />
+                {isAscending ? "Ascending" : "Descending"}
+              </Button>
+
               {/* Bulk Import Dialog */}
               <Dialog>
-                <DialogTrigger render={<Button variant="outline" className="cursor-pointer h-10 gap-2 border-gray-200 hover:bg-gray-50" />}>
+                <DialogTrigger render={<Button variant="outline" className="cursor-pointer h-10 gap-2 border-gray-200 hover:bg-gray-50 w-full sm:w-auto" />}>
                   <Upload className="w-4 h-4" />
                   <span className="hidden sm:inline">Bulk Import</span>
                 </DialogTrigger>
@@ -397,7 +429,7 @@ export default function CatalogHub() {
 
               {/* Add Product Sliding Panel */}
               <Sheet>
-                <SheetTrigger render={<Button className="cursor-pointer h-10 gap-2 shadow-sm" />}>
+                <SheetTrigger render={<Button className="cursor-pointer h-10 gap-2 shadow-sm w-full sm:w-auto" />}>
                   <Plus className="w-4 h-4" />
                   <span className="hidden sm:inline">Add Product</span>
                 </SheetTrigger>
